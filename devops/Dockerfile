@@ -1,9 +1,8 @@
 FROM node:8-alpine
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
-COPY package.json /usr/src/app/
+WORKDIR /home
+COPY package.json /home
 RUN npm install
-COPY . /usr/src/app
+COPY . /home
 RUN npm run build
 EXPOSE 9001
 CMD ["npm", "run", "start"]

@@ -1,5 +1,7 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
+  args: ['pull', 'gcr.io/$PROJECT_ID/ui-service:latest']
+- name: 'gcr.io/cloud-builders/docker'
   args: [
           'build',
           '--cache-from', 'gcr.io/$PROJECT_ID/ui-service:latest',
@@ -8,5 +10,3 @@ steps:
           '.'
         ]
 images: ['gcr.io/$PROJECT_ID/ui-service:latest']
-options:
-  machineType: 'N1_HIGHCPU_8'

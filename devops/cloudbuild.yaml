@@ -11,3 +11,4 @@ images: ['gcr.io/$PROJECT_ID/ui-service:latest']
 options:
   machineType: 'N1_HIGHCPU_8'
 
+

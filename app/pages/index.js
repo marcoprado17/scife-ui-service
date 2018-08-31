@@ -38,7 +38,7 @@ const HomepageHeading = ({ mobile }) => (
       />
       <Header
         as='h2'
-        content='Um seguro automotivo contra furto e roubo baseado em um contrato inteligente na rede Ethereum'
+        content='Um seguro automotivo contra furto e roubo baseado em um contrato inteligente na rede Ethereummm'
         inverted
         style={{
           fontSize: mobile ? '1.5em' : '1.7em',

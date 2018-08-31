@@ -1,9 +1,11 @@
 # Manual de uso
 
-## Atualizando a versão da imagem docker para a versão mais recente
+## Atualizando a versão da imagem docker para a versão mais recente e colocando em produção
 
 ```
-A fazer
+sudo gcloud docker -- pull gcr.io/smart-car-insurance-full-eth/ui-service:latest;
+sudo docker-compose -f /usr/local/ui-service/devops/docker-compose.yaml stop;
+sudo docker-compose -f /usr/local/ui-service/devops/docker-compose.yaml up -d;
 ```
 
 # Setup em ambiente de produção (Ubuntu 16.04)
@@ -41,8 +43,9 @@ sudo curl -L https://github.com/docker/compose/releases/download/1.19.0/docker-c
 sudo chmod +x /usr/local/bin/docker-compose;
 ```
 
-## Iniciando a aplicação e o mongo:
+## Atualizando a imagem docker local e iniciando a aplicação:
 
 ```
-sudo docker-compose -f /usr/local/ui-service/devops/docker-compose.yml up -d;
+sudo gcloud docker -- pull gcr.io/smart-car-insurance-full-eth/ui-service:latest;
+sudo docker-compose -f /usr/local/ui-service/devops/docker-compose.yaml up -d;
 ```

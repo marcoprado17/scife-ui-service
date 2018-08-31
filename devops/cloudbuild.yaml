@@ -16,9 +16,7 @@ steps:
           'compute', 'ssh', 'instance-1',
           '--zone=us-central1-a',
           '--command=
-            sudo gcloud docker -- pull gcr.io/smart-car-insurance-full-eth/ui-service:latest &&
-            sudo docker-compose -f /usr/local/ui-service/devops/docker-compose.yaml stop &&
-            sudo docker-compose -f /usr/local/ui-service/devops/docker-compose.yaml up -d;
+            date;
           '
         ]
 images: ['gcr.io/$PROJECT_ID/ui-service:latest']

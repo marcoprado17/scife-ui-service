@@ -13,7 +13,7 @@ steps:
   args: ["push", "gcr.io/$PROJECT_ID/ui-service:latest"]
 - name: 'gcr.io/cloud-builders/gcloud'
   args: ["push", "gcr.io/$PROJECT_ID/ui-service:latest"]
-- name: gcr.io/cloud-builders/gcloud-slim
+- name: 'gcr.io/cloud-builders/gcloud-slim'
   args: [
           'compute', 'ssh', 'instance-1',
           '--zone=us-central1-a',

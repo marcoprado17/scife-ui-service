@@ -14,7 +14,7 @@ steps:
 - name: 'gcr.io/cloud-builders/gcloud'
   args: [
           'compute',
-          '--project', 'smart-car-insurance-full-eth'
+          '--project', 'smart-car-insurance-full-eth',
           'ssh', 'instance-1',
           '--zone', 'us-central1-a',
           '--command', '

@@ -1,7 +1,0 @@
-version: "3"
-
-services:
-  ui-service:
-    image: gcr.io/smart-car-insurance-full-eth/ui-service:latest
-    ports:
-      - "80:9001"

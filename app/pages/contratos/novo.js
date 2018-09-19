@@ -1,6 +1,11 @@
 import React, {Component} from 'react'
 import {
-  Segment
+  Segment,
+  Form,
+  Checkbox,
+  Button,
+  Input,
+  Label
 } from 'semantic-ui-react'
 import DesktopContainer from "../../components/DesktopContainer"
 
@@ -8,12 +13,71 @@ class CreateNewComponent extends Component {
   static async getInitialProps({pathname}) {
     return {pathname}
   }
+  
+  constructor(props){
+    super(props);
+    this.state = {
+      voteRequired: false
+    }
+  }
 
   render() {
     return (
       <DesktopContainer pathname={this.props.pathname}>
-        <Segment style={{ padding: '4em 0em' }} vertical>
-            <p>Criar novo contrato</p>
+        <Segment style={{ padding: '4em 0em', display: 'flex', justifyContent: 'center' }} vertical>
+          <Form style={{width: '500px'}}>
+            <Form.Field>
+              <label>Nome do contrato</label>
+              <input/>
+            </Form.Field>
+            <Form.Field>
+              <label>Contribuição inicial</label>
+              <Input labelPosition='right' type='text'>
+                <Label basic>$</Label>
+                <input type='number' step='0.000000000000000001' min='0.000000000000000001'/>
+                <Label>eth</Label>
+              </Input>
+            </Form.Field>
+            <Form.Field>
+              <label>Contribuição mensal</label>
+              <Input labelPosition='right' type='text'>
+                <Label basic>$</Label>
+                <input type='number' step='0.000000000000000001' min='0.000000000000000001'/>
+                <Label>eth</Label>
+              </Input>
+            </Form.Field>
+            <Form.Field>
+              <label>Reembolso</label>
+              <Input labelPosition='right' type='text'>
+                <Label basic>$</Label>
+                <input type='number' step='0.000000000000000001' min='0.000000000000000001'/>
+                <Label>eth</Label>
+              </Input>
+            </Form.Field>
+            <Form.Field>
+              <label>Número máxixmo de participantes</label>
+              <input type='number' step='1' min='1'/>
+            </Form.Field>
+            <Form.Field>
+              <Checkbox label='Requer confirmação de roupo por GPS e B.O.' />
+            </Form.Field>
+            <Form.Field>
+              <Checkbox 
+                label='Requer votação para liberar o reembolso' 
+                onChange={event => this.setState({voteRequired: !this.state.voteRequired})}
+              />
+            </Form.Field>
+            { this.state.voteRequired && 
+              <Form.Field>
+                <label>Percentagem mínima de votos para liberar reembolso</label>
+                <Input labelPosition='right' type='text'>
+                  <input type='number' step='1' min='1' max='100'/>
+                  <Label>%</Label>
+                </Input>
+              </Form.Field>
+            }
+            <Button type='submit'>Criar contrato</Button>
+          </Form>
         </Segment>
       </DesktopContainer>
     )

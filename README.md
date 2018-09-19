@@ -49,4 +49,3 @@ sudo chmod +x /usr/local/bin/docker-compose;
 sudo gcloud docker -- pull gcr.io/smart-car-insurance-full-eth/ui-service:latest;
 sudo docker-compose -f /usr/local/ui-service/devops/docker-compose.yaml up -d;
 ```
-

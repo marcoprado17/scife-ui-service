@@ -83,9 +83,9 @@ class CreateNewComponent extends Component {
                     <b>Requer confirmação de roupo por GPS e B.O.: </b>{ contractData.requireGpsAndBOConfirmation ? <Icon name='check'/> : <Icon name='close'/>}<br/>
                     <b>Requer votação para liberar o reembolso: </b>{ contractData.requireVote ? <Icon name='check'/> : <Icon name='close'/>}<br/>
                     <b>Percentagem mínima de votos para liberar reembolso: </b>{contractData.minVotePercentage} %<br/>
-                  </Card.Content>
-                  <Card.Content style={{textAlign: 'right'}}>
-                    <Button>Participar</Button>
+                    <div style={{textAlign: 'right'}}>
+                      <Button type='submit'>Participar</Button>
+                    </div>
                   </Card.Content>
                 </Card>
               )

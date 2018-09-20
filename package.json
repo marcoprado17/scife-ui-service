@@ -18,9 +18,9 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "cd app && next build",
+    "build": "node download_contract_files.js && cd app && next build",
     "start": "env NODE_ENV=production node app.js",
-    "dev": "nodemon --ignore app/ app.js"
+    "dev": "node download_contract_files.js && nodemon --ignore app/ app.js"
   },
   "eslintConfig": {
     "extends": "airbnb",
@@ -83,6 +83,7 @@
     "react-dom": "^16.0.0",
     "sass-loader": "^7.1.0",
     "semantic-ui-react": "^0.82.2",
+    "sync-request": "^6.0.0",
     "web3": "^1.0.0-beta.36"
   },
   "devDependencies": {

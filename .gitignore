@@ -1,3 +1,5 @@
 node_modules
 app/.next
-ethereum/secrets.json
+ethereum/build/*
+ethereum/configs.json
+!ethereum/build/.gitkeep

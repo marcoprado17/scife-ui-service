@@ -2,7 +2,6 @@ import React, {Component} from 'react'
 import {
   Segment,
   Form,
-  Checkbox,
   Button,
   Input,
   Label,
@@ -17,9 +16,7 @@ class CreateNewComponent extends Component {
   
   constructor(props){
     super(props);
-    this.state = {
-      voteRequired: false
-    }
+    this.state = {}
   }
 
   render() {
@@ -59,19 +56,9 @@ class CreateNewComponent extends Component {
                   </Input>
                 </Form.Field>
                 <Form.Field>
-                  <label>Número máxixmo de participantes</label>
+                  <label>Número máximo de participantes</label>
                   <input type='number' step='1' min='1'/>
                 </Form.Field>
-                <Form.Field>
-                  <Checkbox label='Requer confirmação de roupo por GPS e B.O.' />
-                </Form.Field>
-                <Form.Field>
-                  <Checkbox 
-                    label='Requer votação para liberar o reembolso' 
-                    onChange={event => this.setState({voteRequired: !this.state.voteRequired})}
-                  />
-                </Form.Field>
-                { this.state.voteRequired && 
                 <Form.Field>
                   <label>Percentagem mínima de votos para liberar reembolso</label>
                   <Input labelPosition='right' type='text'>
@@ -79,7 +66,6 @@ class CreateNewComponent extends Component {
                     <Label>%</Label>
                   </Input>
                 </Form.Field>
-                }
                 <div style={{textAlign: 'right'}}>
                   <Button type='submit'>Criar contrato</Button>
                 </div>

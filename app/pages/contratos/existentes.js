@@ -2,7 +2,6 @@ import React, {Component} from 'react'
 import {
   Segment,
   Card,
-  Icon,
   Button
 } from 'semantic-ui-react'
 import DesktopContainer from "../../components/DesktopContainer"
@@ -20,8 +19,6 @@ class CreateNewComponent extends Component {
         contractFund: 12.4,
         nParticipants: 3,
         nMaxParticipants: 20,
-        requireGpsAndBOConfirmation: true,
-        requireVote: true,
         minVotePercentage: 33
       },
       {
@@ -34,8 +31,6 @@ class CreateNewComponent extends Component {
         contractFund: 12.4,
         nParticipants: 3,
         nMaxParticipants: 20,
-        requireGpsAndBOConfirmation: true,
-        requireVote: false,
         minVotePercentage: 33
       },
       {
@@ -48,8 +43,6 @@ class CreateNewComponent extends Component {
         contractFund: 12.4,
         nParticipants: 3,
         nMaxParticipants: 20,
-        requireGpsAndBOConfirmation: false,
-        requireVote: true,
         minVotePercentage: 50
       }
     ]
@@ -80,8 +73,6 @@ class CreateNewComponent extends Component {
                     <b>Reembolso: </b>{contractData.refundValue} eth<br/>
                     <b>Caixa do contrato: </b>{contractData.contractFund} eth<br/>
                     <b>Número de participantes: </b>{contractData.nParticipants}/{contractData.nMaxParticipants}<br/>
-                    <b>Requer confirmação de roupo por GPS e B.O.: </b>{ contractData.requireGpsAndBOConfirmation ? <Icon name='check'/> : <Icon name='close'/>}<br/>
-                    <b>Requer votação para liberar o reembolso: </b>{ contractData.requireVote ? <Icon name='check'/> : <Icon name='close'/>}<br/>
                     <b>Percentagem mínima de votos para liberar reembolso: </b>{contractData.minVotePercentage} %<br/>
                     <div style={{textAlign: 'right'}}>
                       <Button type='submit'>Participar</Button>

@@ -1,2 +1,4 @@
 node_modules
 app/.next
+ethereum/secrets.json
+ethereum/build

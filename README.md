@@ -49,3 +49,12 @@ sudo chmod +x /usr/local/bin/docker-compose;
 sudo gcloud docker -- pull gcr.io/smart-car-insurance-full-eth/ui-service:latest;
 sudo docker-compose -f /usr/local/ui-service/devops/docker-compose.yaml up -d;
 ```
+
+# Observações (LEIA COM ATENÇÃO!!!)
+
+* Não esquecer de atualizar a pasta do ethereum sempre que atualizar o contrato.
+
+# TODO
+
+* Importal os orquivos dos ethereum via npm;
+* Atualizar o rep com o arquivo ethereum original.

@@ -83,8 +83,6 @@
     "react-dom": "^16.0.0",
     "sass-loader": "^7.1.0",
     "semantic-ui-react": "^0.82.2",
-    "solc": "^0.4.25",
-    "truffle-hdwallet-provider": "0.0.3",
     "web3": "^1.0.0-beta.36"
   },
   "devDependencies": {

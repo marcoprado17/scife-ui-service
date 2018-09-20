@@ -9,7 +9,7 @@ import {
   Message
 } from 'semantic-ui-react'
 import DesktopContainer from "../../components/DesktopContainer"
-let factory = null;
+let smartCarInsuranceFactoryContract = null;
 let web3 = null; 
 
 class CreateNewComponent extends Component {
@@ -27,7 +27,7 @@ class CreateNewComponent extends Component {
   }
 
   componentDidMount(){
-    factory = require('../../../ethereum/factory').default;
+    smartCarInsuranceFactoryContract = require('../../../ethereum/smart_car_insurance_factory_contract').default;
     web3 = require('../../../ethereum/web3').default;
   }
 
@@ -38,7 +38,7 @@ class CreateNewComponent extends Component {
 
     try {
       const accounts = await web3.eth.getAccounts();
-      await factory.methods
+      await smartCarInsuranceFactoryContract.methods
         .createSmartCarInsuranceContract(
           this.state.contractName,
           this.state.initialContribution,

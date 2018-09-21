@@ -2,7 +2,8 @@ import React, {Component} from 'react'
 import {
   Segment,
   Card,
-  Button
+  Button,
+  Divider
 } from 'semantic-ui-react'
 import DesktopContainer from "../../components/DesktopContainer"
 
@@ -58,6 +59,10 @@ class CreateNewComponent extends Component {
     this.state = {}
   }
 
+  componentDidMount(){
+
+  }
+
   render() {
     return (
       <DesktopContainer pathname={this.props.pathname}>
@@ -65,8 +70,10 @@ class CreateNewComponent extends Component {
             {this.props.contracts.map(function(contractData){
               return (
                 <Card style={{width: '600px', marginLeft: 'auto', marginRight: 'auto'}}>
-                  <Card.Content header={contractData.name} meta={contractData.id}></Card.Content>
-                  <Card.Content extra>
+                  <Card.Content>
+                    <Card.Header style={{marginTop: '8px'}}>{contractData.name}</Card.Header>
+                    <Card.Meta>{contractData.id}</Card.Meta>
+                    <Divider/>
                     <b>Criador: </b>{contractData.creatorId}<br/>
                     <b>Contribuição inicial: </b>{contractData.initialContribution} eth<br/>
                     <b>Contribuição mensal: </b>{contractData.monthlyContribution} eth<br/>

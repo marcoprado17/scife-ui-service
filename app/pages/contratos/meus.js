@@ -93,18 +93,7 @@ class CreateNewComponent extends Component {
             iAlreadyApproved: true,
             boConfirmed: false
           }
-        ],
-        payment: {
-          onDay: true,
-          nextDueDate: "08/10/2018",
-          nextPaymentMade: true,
-          paymentHistory: [
-            ["08/08/2018 19:26", 1.2],
-            ["08/08/2018 19:26", 1.2],
-            ["08/08/2018 19:26", 1.2],
-            ["08/08/2018 19:26", 1.2],
-          ]
-        }
+        ]
       },
       {
         name: "Contrato 2",
@@ -186,18 +175,7 @@ class CreateNewComponent extends Component {
             iAlreadyApproved: false,
             boConfirmed: false
           }
-        ],
-        payment: {
-          onDay: true,
-          nextDueDate: "08/10/2018",
-          nextPaymentMade: false,
-          paymentHistory: [
-            ["08/08/2018 19:26", 1.2],
-            ["08/08/2018 19:26", 1.2],
-            ["08/08/2018 19:26", 1.2],
-            ["08/08/2018 19:26", 1.2],
-          ]
-        }
+        ]
       },
       {
         name: "Contrato 3",
@@ -279,18 +257,7 @@ class CreateNewComponent extends Component {
             iAlreadyApproved: false,
             boConfirmed: false
           }
-        ],
-        payment: {
-          onDay: false,
-          nextDueDate: "08/10/2018",
-          nextPaymentMade: true,
-          paymentHistory: [
-            ["08/08/2018 19:26", 1.2],
-            ["08/08/2018 19:26", 1.2],
-            ["08/08/2018 19:26", 1.2],
-            ["08/08/2018 19:26", 1.2],
-          ]
-        }
+        ]
       }
     ];
 
@@ -327,16 +294,7 @@ class CreateNewComponent extends Component {
                         <h5 style={{marginTop: '2px'}}>{contract.id}</h5>
                       </div>
                       <div>
-                        { !contract.payment.onDay &&
-                          <Label as='a' color='red' content='Fora do contrato devido a não pagamento' style={{height: '28px', float:'right', marginLeft: '4px'}}/>
-                        }
-                        { (contract.payment.onDay && !contract.payment.nextPaymentMade) &&
-                          <Label as='a' color='yellow' content='Pagamento mensal não efetuado' style={{height: '28px', float:'right', marginLeft: '4px'}}/>
-                        }
-                        { (contract.payment.onDay && contract.payment.nextPaymentMade) &&
-                          <Label as='a' color='green' content='Pagamento mensal efetuado' style={{height: '28px', float:'right', marginLeft: '4px'}}/>
-                        }
-                        { (contract.payment.onDay && contract.requests.some((request) => {return !request.iAlreadyApproved})) &&
+                        { contract.requests.some((request) => {return !request.iAlreadyApproved}) &&
                           <Label as='a' color='blue' content='Novas requisições' style={{height: '28px', float:'right', marginLeft: '4px'}}/>
                         }
                       </div>
@@ -424,10 +382,6 @@ class CreateNewComponent extends Component {
                             )
                           })}
                         </Tab.Pane> 
-                      },
-                      { 
-                        menuItem: 'Pagamento', render: () => 
-                        <Tab.Pane>A fazer...</Tab.Pane> 
                       },
                       { 
                         menuItem: 'Criar Requisição', render: () => 

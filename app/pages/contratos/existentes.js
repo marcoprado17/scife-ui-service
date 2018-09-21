@@ -6,51 +6,14 @@ import {
   Divider
 } from 'semantic-ui-react'
 import DesktopContainer from "../../components/DesktopContainer"
+let smartCarInsuranceFactoryContract = null;
+let SmartCarInsuranceContract = null;
+let web3 = null;
 
 class CreateNewComponent extends Component {
   static async getInitialProps({pathname}) {
-    let contracts = [
-      {
-        name: "Contrato 1",
-        id: "0x43w3a54sd33ca54346",
-        creatorId: "0x43534sad45a4sd",
-        initialContribution: 1.2,
-        monthlyContribution: 0.2,
-        refundValue: 5.7,
-        contractFund: 12.4,
-        nParticipants: 3,
-        nMaxParticipants: 20,
-        minVotePercentage: 33
-      },
-      {
-        name: "Contrato 2",
-        id: "0x43w3a54sd33ca54346",
-        creatorId: "0x43534sad45a4sd",
-        initialContribution: 1.2,
-        monthlyContribution: 0.2,
-        refundValue: 5.7,
-        contractFund: 12.4,
-        nParticipants: 3,
-        nMaxParticipants: 20,
-        minVotePercentage: 33
-      },
-      {
-        name: "Contrato 3",
-        id: "0x43w3a54sd33ca54346",
-        creatorId: "0x43534sad45a4sd",
-        initialContribution: 1.2,
-        monthlyContribution: 0.2,
-        refundValue: 5.7,
-        contractFund: 12.4,
-        nParticipants: 3,
-        nMaxParticipants: 20,
-        minVotePercentage: 50
-      }
-    ]
-    
     return {
-      pathname,
-      contracts
+      pathname
     }
   }
 
@@ -59,28 +22,47 @@ class CreateNewComponent extends Component {
     this.state = {}
   }
 
-  componentDidMount(){
+  async componentDidMount(){
+    web3 = require('../../../ethereum/web3').default;
+    smartCarInsuranceFactoryContract = require('../../../ethereum/smart_car_insurance_factory_contract').default;
+    SmartCarInsuranceContract = require('../../../ethereum/smart_car_insurance_contract').default;
 
+    let contracts = []
+
+    let deployedContractsAddresses = await smartCarInsuranceFactoryContract.methods.getDeployedContracts().call();
+    deployedContractsAddresses.map(async deployedContractAddress => {
+      let smartCarInsuranceContract = SmartCarInsuranceContract(deployedContractAddress);
+      let detailsPromise = smartCarInsuranceContract.methods.details().call();
+      let balancePromise = web3.eth.getBalance(deployedContractAddress);
+      let [details, balance] = await Promise.all([detailsPromise, balancePromise]);
+      contracts.push({
+        address: deployedContractAddress,
+        balance: balance,
+        details: details
+      });
+      this.setState({contracts});
+    });
   }
 
   render() {
     return (
       <DesktopContainer pathname={this.props.pathname}>
         <Segment style={{ padding: '4em 0em'}} vertical>
-            {this.props.contracts.map(function(contractData){
+            { this.state.contracts &&
+              this.state.contracts.map(function(contract){
               return (
                 <Card style={{width: '600px', marginLeft: 'auto', marginRight: 'auto'}}>
                   <Card.Content>
-                    <Card.Header style={{marginTop: '8px'}}>{contractData.name}</Card.Header>
-                    <Card.Meta>{contractData.id}</Card.Meta>
+                    <Card.Header style={{marginTop: '8px'}}>{contract.details.name}</Card.Header>
+                    <Card.Meta>{contract.address}</Card.Meta>
                     <Divider/>
-                    <b>Criador: </b>{contractData.creatorId}<br/>
-                    <b>Contribuição inicial: </b>{contractData.initialContribution} eth<br/>
-                    <b>Contribuição mensal: </b>{contractData.monthlyContribution} eth<br/>
-                    <b>Reembolso: </b>{contractData.refundValue} eth<br/>
-                    <b>Caixa do contrato: </b>{contractData.contractFund} eth<br/>
-                    <b>Número de participantes: </b>{contractData.nParticipants}/{contractData.nMaxParticipants}<br/>
-                    <b>Percentagem mínima de votos para liberar reembolso: </b>{contractData.minVotePercentage} %<br/>
+                    <b>Criador: </b>{contract.details.creatorId}<br/>
+                    <b>Contribuição inicial: </b>{web3.utils.fromWei(contract.details.initialContribution)} eth<br/>
+                    <b>Contribuição mensal: </b>{web3.utils.fromWei(contract.details.monthlyContribution)} eth<br/>
+                    <b>Reembolso: </b>{web3.utils.fromWei(contract.details.refundValue)} eth<br/>
+                    <b>Caixa do contrato: </b>{web3.utils.fromWei(contract.balance)} eth<br/>
+                    <b>Número de participantes: </b>{contract.details.nParticipants}/{contract.details.nMaxParticipants}<br/>
+                    <b>Percentagem mínima de votos para liberar reembolso: </b>{contract.details.minVotePercentageToRefund} %<br/>
                     <div style={{textAlign: 'right'}}>
                       <Button type='submit'>Participar</Button>
                     </div>

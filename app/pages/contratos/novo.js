@@ -41,9 +41,9 @@ class CreateNewComponent extends Component {
       await smartCarInsuranceFactoryContract.methods
         .createSmartCarInsuranceContract(
           this.state.contractName,
-          this.state.initialContribution,
-          this.state.monthlyContribution,
-          this.state.refundValue,
+          web3.utils.toWei(this.state.initialContribution),
+          web3.utils.toWei(this.state.monthlyContribution),
+          web3.utils.toWei(this.state.refundValue),
           this.state.nMaxParticipants,
           this.state.minVotePercentageToRefund 
         )

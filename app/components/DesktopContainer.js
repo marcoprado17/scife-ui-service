@@ -81,10 +81,10 @@ class DesktopContainer extends Component {
                     <Grid.Row>
                         <Grid.Column width={6}>
                         <List link inverted>
-                            <List.Item as='a'>Home</List.Item>
-                            <List.Item as='a'>Criar um novo contrato</List.Item>
-                            <List.Item as='a'>Participar de um contrato existente</List.Item>
-                            <List.Item as='a'>Administrar meus contratos</List.Item>
+                            <List.Item as='a'><Link href="/">Home</Link></List.Item>
+                            <List.Item as='a'><Link href="/contratos/novo">Criar um novo contrato</Link></List.Item>
+                            <List.Item as='a'><Link href="/contratos/existentes">Participar de um contrato existente</Link></List.Item>
+                            <List.Item as='a'><Link href="/contratos/meus">Administrar meus contratos</Link></List.Item>
                         </List>
                         </Grid.Column>
                         <Grid.Column width={10}>

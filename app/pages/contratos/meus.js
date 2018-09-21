@@ -11,6 +11,7 @@ import {
 } from 'semantic-ui-react';
 import DesktopContainer from "../../components/DesktopContainer";
 import BoolIcon from "../../components/BoolIcon";
+import LatLong from "../../components/LatLong";
 
 class CreateNewComponent extends Component {
   static async getInitialProps({pathname}) {
@@ -274,14 +275,6 @@ class CreateNewComponent extends Component {
     this.state = {}
   }
 
-  renderLatLong(lat, long){
-    return (
-      <a href={`http://www.google.com/maps/place/${lat},${long}`} target="_new">
-        {lat}, {long}
-      </a>
-    )
-  }
-
   render() {
     return (
       <DesktopContainer pathname={this.props.pathname}>
@@ -356,7 +349,7 @@ class CreateNewComponent extends Component {
                                 <b>Aprovações: </b>{request.approvers}/{request.nTotalApprovers}<br/>
                                 <b>Número mínimo de aprovações: </b>{request.nMinApprovers}<br/>
                                 <b>Hora aproximada do roubo ou furto: </b>{request.aproxTimeOfTheft}<br/>
-                                <b>Local do furto: </b>{this.renderLatLong(request.theftLocation[0], request.theftLocation[1])}<br/>
+                                <b>Local do furto: </b><LatLong lat={request.theftLocation[0]} long={request.theftLocation[1]}/><br/>
                                 <b>Boletim de ocorrência gerado e confirmado pela pólicia: </b><BoolIcon value={request.boConfirmed}/><br/>
                                 <b>Histórico da localização do carro: </b><br/>
                                 <Table>
@@ -371,7 +364,7 @@ class CreateNewComponent extends Component {
                                       return (
                                         <Table.Row>
                                           <Table.Cell>{carLoactionHistoryRow[0]}</Table.Cell>
-                                          <Table.Cell>{this.renderLatLong(carLoactionHistoryRow[1], carLoactionHistoryRow[2])}</Table.Cell>
+                                          <Table.Cell><LatLong lat={carLoactionHistoryRow[1]} long={carLoactionHistoryRow[2]}/></Table.Cell>
                                         </Table.Row>
                                       )
                                     })}

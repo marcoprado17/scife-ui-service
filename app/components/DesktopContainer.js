@@ -85,6 +85,7 @@ class DesktopContainer extends Component {
                             <List.Item as='a'><Link href="/contratos/novo">Criar um novo contrato</Link></List.Item>
                             <List.Item as='a'><Link href="/contratos/existentes">Participar de um contrato existente</Link></List.Item>
                             <List.Item as='a'><Link href="/contratos/meus">Administrar meus contratos</Link></List.Item>
+                            <List.Item as='a'><Link href="/aprovacao">Aprovar requisições (polícia)</Link></List.Item>
                         </List>
                         </Grid.Column>
                         <Grid.Column width={10}>

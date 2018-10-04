@@ -44,12 +44,14 @@ class CreateNewComponent extends Component {
       let smartCarInsuranceContract = SmartCarInsuranceContract(myContractAddress);
       let detailsPromise = smartCarInsuranceContract.methods.details().call();
       let balancePromise = web3.eth.getBalance(myContractAddress);
-      let [details, balance] = await Promise.all([detailsPromise, balancePromise]);
+      let membersPromise = smartCarInsuranceContract.methods.getMembers().call();
+      let [details, balance, members] = await Promise.all([detailsPromise, balancePromise, membersPromise]);
       contracts.push({
         address: myContractAddress,
         balance: balance,
         details: details,
         smartCarInsuranceContract: smartCarInsuranceContract,
+        members: members,
         requests: [
           {
             createdBy: "0xfg2323123vhgv21",
@@ -148,21 +150,14 @@ class CreateNewComponent extends Component {
                         </Tab.Pane>
                     },
                     {
-                      menuItem: 'Histórico', render: () =>
+                      menuItem: 'Participantes', render: () =>
                         <Tab.Pane>
                           <Table basic='very'>
-                            <Table.Header>
-                              <Table.Row>
-                                <Table.HeaderCell>Tempo</Table.HeaderCell>
-                                <Table.HeaderCell>Mensagem</Table.HeaderCell>
-                              </Table.Row>
-                            </Table.Header>
                             <Table.Body>
-                              {contract.history.map((historyRow) => {
+                              {contract.members.map((memberAddress) => {
                                 return (
                                   <Table.Row>
-                                    <Table.Cell>{historyRow[0]}</Table.Cell>
-                                    <Table.Cell>{historyRow[1]}</Table.Cell>
+                                    <Table.Cell>{memberAddress}</Table.Cell>
                                   </Table.Row>
                                 )
                               })}

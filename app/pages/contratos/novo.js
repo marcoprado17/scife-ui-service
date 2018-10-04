@@ -42,7 +42,6 @@ class CreateNewComponent extends Component {
         .createSmartCarInsuranceContract(
           this.state.contractName,
           web3.utils.toWei(this.state.initialContribution),
-          web3.utils.toWei(this.state.monthlyContribution),
           web3.utils.toWei(this.state.refundValue),
           this.state.nMaxParticipants,
           this.state.minVotePercentageToRefund 
@@ -60,7 +59,6 @@ class CreateNewComponent extends Component {
       loading: false,
       contractName: '',
       initialContribution: '',
-      monthlyContribution: '',
       refundValue: '',
       nMaxParticipants: '',
       minVotePercentageToRefund: ''
@@ -90,18 +88,6 @@ class CreateNewComponent extends Component {
                       type='number' step='0.000000000000000001' min='0.000000000000000001'
                       value={this.state.initialContribution}
                       onChange={event => this.setState({ initialContribution: event.target.value })}
-                    />
-                    <Label>eth</Label>
-                  </Input>
-                </Form.Field>
-                <Form.Field>
-                  <label>Contribuição mensal</label>
-                  <Input labelPosition='right' type='text'>
-                    <Label basic>$</Label>
-                    <input 
-                      type='number' step='0.000000000000000001' min='0.000000000000000001'
-                      value={this.state.monthlyContribution}
-                      onChange={event => this.setState({ monthlyContribution: event.target.value })}  
                     />
                     <Label>eth</Label>
                   </Input>

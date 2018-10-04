@@ -31,13 +31,10 @@ class ParticipateButton extends Component {
       value: this.props.txValue
     })
       .once("receipt", (receipt) => {
-        this.setState({successMessage: "Participação efetuada com sucesso"});
+        this.setState({successMessage: "Participação efetuada com sucesso", loading: false});
       })
       .on("error", (err) => {
-        this.setState({errorMessage: err.message});
-      })
-      .finally( () => {
-        this.setState({loading: false});
+        this.setState({errorMessage: err.message, loading: false});
       });
   }
 

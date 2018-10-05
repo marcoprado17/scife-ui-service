@@ -12,9 +12,134 @@ import {
 import DesktopContainer from "../../components/DesktopContainer";
 import BoolIcon from "../../components/BoolIcon";
 import LatLong from "../../components/LatLong";
+import moment from "moment";
 let smartCarInsuranceFactoryContract = null;
 let SmartCarInsuranceContract = null;
 let web3 = null;
+const bip39 = require("bip39");
+const hdkey = require('ethereumjs-wallet/hdkey');
+const crypto = require('crypto');
+
+class CreateNewRequest extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: false
+    }
+  }
+
+  onSubmit = async () => {
+    this.setState({
+      loading: true
+    });
+
+    let account = (await web3.eth.getAccounts())[0];
+
+    console.log(this.state);
+    console.log(moment.utc(this.state.timeOfTheft).format("X"));
+
+    let unixTimesptampOfTheft = Number(moment.utc(this.state.timeOfTheft).format("X"));
+    console.log(unixTimesptampOfTheft);
+    // TODO: Remover esse unixTimesptampOfTheft temporário
+    unixTimesptampOfTheft = 1538716756;
+
+    try {
+      let gpsDataIndex = Number(await this.props.smartCarInsuranceContract.methods.getGpsDataIndex(account, unixTimesptampOfTheft).call());
+      let min = Math.max(gpsDataIndex-6, 0);
+      let lengthOfGpsData =  await this.props.smartCarInsuranceContract.methods.getLengthOfGpsData(account).call();
+      let max = Math.min(gpsDataIndex+6, lengthOfGpsData-1);
+  
+      let keysOfGpsData = [];
+
+      const gpsHdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(this.state.mnemonic));
+
+      for(let i = min; i <= max; i++){
+        let gpsData = await this.props.smartCarInsuranceContract.methods.gpsDataByUserAddress(account, i).call();
+        let walledChildrenIdx = gpsData.creationUnixTimestamp-946684800;
+        let key = gpsHdwallet.deriveChild(walledChildrenIdx).getWallet().getPrivateKey();
+        keysOfGpsData.push([i, key])
+      }
+  
+      let gpsData = {
+        unixTimesptampOfTheft: unixTimesptampOfTheft,
+        latTheft: this.state.lat,
+        longTheft: this.state.long,
+        keysOfGpsData: keysOfGpsData
+      }
+  
+      console.log("Iniciando chamada");
+      try {
+        await this.props.smartCarInsuranceContract.methods.createNewRefundRequest(JSON.stringify(gpsData)).send({
+          from: account
+        });
+        this.setState({successMessage: "Nova requisição de reembolso criada com sucesso!", loading: false});
+      }
+      catch(err){
+        this.setState({errorMessage: err.message, loading: false});
+      }
+    }
+    catch(err){
+      console.error(err);
+      this.setState({errorMessage: err.message, loading: false});
+    }
+  }
+
+  render() {
+    console.log(this.state);
+    return (
+      <Form onSubmit={this.onSubmit} style={{ padding: '18px 8px' }}>
+        <Form.Group widths='equal'>
+          <Form.Field>
+            <label>Dia e hora aproximada do roubo (em UTC)</label>
+            <input 
+              type='datetime-local' 
+              value={this.state.timeOfTheft}
+              onChange={event => this.setState({ timeOfTheft: event.target.value })}
+            />
+          </Form.Field>
+          <Form.Field>
+            <label>Latidude (do local do roubo)</label>
+            <input type='number' min='-90' max='90' step='0.00000001' 
+              value={this.state.lat}
+              onChange={event => this.setState({ lat: event.target.value })}
+            />
+          </Form.Field>
+          <Form.Field>
+            <label>Longitude (do local do roubo)</label>
+            <input type='number' min='-180' max='180' step='0.00000001' 
+              value={this.state.long}
+              onChange={event => this.setState({ long: event.target.value })}
+            />
+          </Form.Field>
+        </Form.Group>
+        <Form.Field>
+          <label>Mnemonico utilizado por seu gps para criptografar os dados</label>
+          <input type='text'
+            value={this.state.mnemonic}
+            onChange={event => this.setState({ mnemonic: event.target.value })}
+          />
+        </Form.Field>
+        <Message info header='Não se preocupe' content="Seu mnemonico só será utilizado para fornecer as chaves para descritografarmos os dados de seu gps nas 24 horas mais proximas do roubo." />
+        {
+          this.state.successMessage &&
+          <Message positive style={{marginTop: "12px"}}>
+            <Message.Header>{this.state.successMessage}</Message.Header>
+          </Message>
+        }
+        {
+          this.state.errorMessage &&
+          <Message negative style={{marginTop: "12px"}}>
+            <Message.Header>Falha ao tentar criar a nova requisição de reembolso!</Message.Header>
+            {this.state.errorMessage}
+          </Message>
+        }
+        <div style={{ textAlign: 'right' }}>
+          <Button loading={this.state.loading}>Criar requisição</Button>
+        </div>
+      </Form>
+    )
+  }
+}
 
 class CreateNewComponent extends Component {
   static async getInitialProps({ pathname }) {
@@ -45,71 +170,70 @@ class CreateNewComponent extends Component {
       let detailsPromise = smartCarInsuranceContract.methods.details().call();
       let balancePromise = web3.eth.getBalance(myContractAddress);
       let membersPromise = smartCarInsuranceContract.methods.getMembers().call();
-      let [details, balance, members] = await Promise.all([detailsPromise, balancePromise, membersPromise]);
-      contracts.push({
-        address: myContractAddress,
-        balance: balance,
-        details: details,
-        smartCarInsuranceContract: smartCarInsuranceContract,
-        members: members,
-        requests: [
-          {
-            createdBy: "0xfg2323123vhgv21",
-            creationTime: "08/09/2017",
-            aproxTimeOfTheft: "08/08/2018 19:26",
-            theftLocation: [-23.192226, -45.876944],
-            carLocationHistory: [
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-            ],
-            approvers: 10,
-            nTotalApprovers: 35,
-            nMinApprovers: 30,
-            iAlreadyApproved: false,
-            boConfirmed: false
-          },
-          {
-            createdBy: "0xfg2323123vhgv21",
-            creationTime: "08/09/2017",
-            aproxTimeOfTheft: "08/08/2018 19:26",
-            theftLocation: [-23.192226, -45.876944],
-            carLocationHistory: [
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-              ["08/08/2018 19:26", -23.192226, -45.876944],
-            ],
-            approvers: 10,
-            nTotalApprovers: 100,
-            nMinApprovers: 30,
-            iAlreadyApproved: true,
-            boConfirmed: false
+      let requestsPromise = smartCarInsuranceContract.methods.getLengthOfRequests().call()
+        .then((l) => {
+          let allRequestsPromise = []
+          for(let i = 0; i < l; i++){
+            allRequestsPromise.push(smartCarInsuranceContract.methods.requests(i).call());
           }
-        ]
+          return Promise.all(allRequestsPromise);
+        });
+      let [details, balance, members, requests] = await Promise.all([detailsPromise, balancePromise, membersPromise, requestsPromise]);
+      requests = await Promise.all(requests.map(async (request) => {
+        let decodedData = (() => {
+          try{
+            return JSON.parse(request.encodedData);
+          }
+          catch(err){
+            return {};
+          }
+        })();
+        let keys = [];
+        let carLocationHistoryPromises = decodedData.keysOfGpsData.map((keyOfGpsData) => {
+          let idx = keyOfGpsData[0];
+          let key = keyOfGpsData[1];
+          keys.push(key);
+          return smartCarInsuranceContract.methods.gpsDataByUserAddress(account, idx).call();
+        })
+
+        let carLocationHistoryGpsData = await Promise.all(carLocationHistoryPromises);
+
+        let carLocationHistory = carLocationHistoryGpsData.map((gpsData, idx) => {
+          console.log(gpsData.encryptedLatLong);
+          const decipher = crypto.createDecipher("aes256", keys[idx]);
+          let decrypedLatLong = {}
+          try{
+            decrypedLatLong = decipher.update(gpsData.encryptedLatLong, 'hex', 'utf8');
+            decrypedLatLong += decipher.final('utf8');
+          }
+          catch(err){
+            console.error(err);
+          }
+          console.log(decrypedLatLong);
+          return [moment.utc(gpsData.creationUnixTimestamp, 'X').format(), decrypedLatLong.lat, decrypedLatLong.long];
+        });
+
+        // TODO: Obter iAlreadyApproved and carLocationHistory
+        return {
+          createdBy: request.creatorAddress,
+          creationTime: moment.utc(Number(request.unixTimestampOfBlock), 'X').format(),
+          aproxTimeOfTheft: moment.utc(decodedData.unixTimesptampOfTheft, 'X').format(),
+          theftLocation: [decodedData.latTheft, decodedData.longTheft],
+          carLocationHistory: carLocationHistory,
+          approvers: request.nApprovers,
+          nTotalApprovers: details.nParticipants,
+          nMinApprovers: Math.ceil(details.nParticipants*details.minVotePercentageToRefund/100),
+          iAlreadyApproved: false,
+          boConfirmed: request.boConfirmed
+        }
+      }));
+      contracts.push({
+        balance,
+        details,
+        smartCarInsuranceContract,
+        members,
+        requests,
+        address: myContractAddress
       });
       this.setState({ contracts });
     });
@@ -183,7 +307,7 @@ class CreateNewComponent extends Component {
                                 <b>Número mínimo de aprovações: </b>{request.nMinApprovers}<br />
                                 <b>Hora aproximada do roubo ou furto: </b>{request.aproxTimeOfTheft}<br />
                                 <b>Local do furto: </b><LatLong lat={request.theftLocation[0]} long={request.theftLocation[1]} /><br />
-                                <b>Boletim de ocorrência gerado e confirmado pela pólicia: </b><BoolIcon value={request.boConfirmed} /><br />
+                                <b>Boletim de ocorrência gerado e confirmado pela polícia: </b><BoolIcon value={request.boConfirmed} /><br />
                                 <b>Histórico da localização do carro: </b><br />
                                 <Table>
                                   <Table.Header>
@@ -213,30 +337,7 @@ class CreateNewComponent extends Component {
                     },
                     {
                       menuItem: 'Criar Requisição', render: () =>
-                        <Form onSubmit={this.onSubmit} style={{ padding: '18px 8px' }}>
-                          <Form.Group widths='equal'>
-                            <Form.Field>
-                              <label>Dia e hora aproximada do roubo</label>
-                              <input type='datetime-local' />
-                            </Form.Field>
-                            <Form.Field>
-                              <label>Latidude (do local do roubo)</label>
-                              <input type='number' min='-90' max='90' step='0.00000001' />
-                            </Form.Field>
-                            <Form.Field>
-                              <label>Longitude (do local do roubo)</label>
-                              <input type='number' min='-180' max='180' step='0.00000001' />
-                            </Form.Field>
-                          </Form.Group>
-                          <Form.Field>
-                            <label>Mnemonico de sua conta ethereum</label>
-                            <input type='text' />
-                          </Form.Field>
-                          <Message info header='Não se preocupe' content="Seu mnemonico só será utilizado para fornecer as chaves para descritografarmos os dados de seu gps nas 24 horas mais proximas do roubo." />
-                          <div style={{ textAlign: 'right' }}>
-                            <Button loading={this.state.loading}>Criar requisição</Button>
-                          </div>
-                        </Form>
+                        <CreateNewRequest smartCarInsuranceContract={contract.smartCarInsuranceContract}></CreateNewRequest>
                     },
                   ]} />
                 </Card.Content>

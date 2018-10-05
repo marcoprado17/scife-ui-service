@@ -26,16 +26,16 @@ class ParticipateButton extends Component {
 
     console.log(this.props.txValue);
 
-    this.props.smartCarInsuranceContract.methods.enterContract().send({
-      from: accounts[0],
-      value: this.props.txValue
-    })
-      .once("receipt", (receipt) => {
-        this.setState({successMessage: "Participação efetuada com sucesso", loading: false});
-      })
-      .on("error", (err) => {
-        this.setState({errorMessage: err.message, loading: false});
+    try {
+      await this.props.smartCarInsuranceContract.methods.enterContract().send({
+        from: accounts[0],
+        value: this.props.txValue
       });
+      this.setState({successMessage: "Participação efetuada com sucesso", loading: false});
+    }
+    catch(err){
+      this.setState({errorMessage: err.message, loading: false});
+    }
   }
 
   render() {
@@ -43,7 +43,7 @@ class ParticipateButton extends Component {
       <div>
         {
           this.state.successMessage &&
-          <Message success style={{marginTop: "12px"}}>
+          <Message positive style={{marginTop: "12px"}}>
             <Message.Header>{this.state.successMessage}</Message.Header>
           </Message>
         }

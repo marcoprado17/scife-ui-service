@@ -51,7 +51,7 @@ class CreateNewComponent extends Component {
         });
       this.setState({ showSuccessMessage: true});
     } catch (err) {
-      console.log(err);
+      console.error(err.message);
       this.setState({ errorMessage: err.message });
     }
 

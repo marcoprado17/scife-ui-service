@@ -57,4 +57,5 @@ sudo docker-compose -f /usr/local/ui-service/devops/docker-compose.yaml up -d;
 # TODO
 
 * Importal os orquivos dos ethereum via npm;
-* Atualizar o rep com o arquivo ethereum original.
+* Atualizar o rep com o arquivo ethereum original;
+* Utilizar algum módulo de DI (Dependency Injection) para organizar melhor o código.

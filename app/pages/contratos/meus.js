@@ -2,66 +2,63 @@ import React, { Component } from 'react';
 import {
   Segment,
   Card,
-  Label,
-  Tab,
-  Table,
-  Button,
-  Form,
-  Message
+  Tab
 } from 'semantic-ui-react';
 import DesktopContainer from "../../components/DesktopContainer";
-import BoolIcon from "../../components/BoolIcon";
-import LatLong from "../../components/LatLong";
-import moment from "moment";
 import NewRequestTabContent from "../../components/my_contracts/NewRequestTabContent";
 import DetailsTabContent from "../../components/my_contracts/DetailsTabContent";
 import MembersTabContent from "../../components/my_contracts/MembersTabContent";
 import RequestsTabContent from "../../components/my_contracts/RequestsTabContent";
 import ContractHeader from "../../components/my_contracts/ContractHeader";
-let smartCarInsuranceFactoryContract = null;
-let SmartCarInsuranceContract = null;
-let web3 = null;
-const crypto = require('crypto');
+if(process.browser) {
+  this.web3 = require('../../../ethereum/web3');
+  this.smartCarInsuranceContractFactory = require('../../../ethereum/smartCarInsuranceContractFactory');
+  this.SmartCarInsuranceContract = require('../../../ethereum/SmartCarInsuranceContract');
+}
 
-class MyContractsPage extends Component {
+export default class MyContractsPage extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {}
+  }
+
   static async getInitialProps({ pathname }) {
     return {
       pathname,
     }
   }
 
-  constructor(props) {
-    super(props);
-    this.state = {}
-  }
-
   async componentDidMount() {
-    web3 = require('../../../ethereum/web3').default;
-    smartCarInsuranceFactoryContract = require('../../../ethereum/smart_car_insurance_factory_contract').default;
-    SmartCarInsuranceContract = require('../../../ethereum/smart_car_insurance_contract').default;
-
-    let contracts = [];
-    this.setState({ contracts });
-
+    
     let account = (await web3.eth.getAccounts())[0];
-    let myContractsAddresses = await smartCarInsuranceFactoryContract.methods.getMyContractAddresses().call({
+    let myContractsAddresses = await smartCarInsuranceContractFactory.methods.getMyContractAddresses().call({
       from: account
     });
 
-    myContractsAddresses.map(async myContractAddress => {
-      let smartCarInsuranceContract = SmartCarInsuranceContract(myContractAddress);
-      let detailsPromise = smartCarInsuranceContract.methods.details().call();
-      let balancePromise = web3.eth.getBalance(myContractAddress);
-      let membersPromise = smartCarInsuranceContract.methods.getMembers().call();
-      let requestsPromise = smartCarInsuranceContract.methods.getLengthOfRequests().call()
-        .then((l) => {
-          let allRequestsPromise = []
-          for(let i = 0; i < l; i++){
-            allRequestsPromise.push(smartCarInsuranceContract.methods.requests(i).call());
-          }
-          return Promise.all(allRequestsPromise);
-        });
-      let [details, balance, members, requests] = await Promise.all([detailsPromise, balancePromise, membersPromise, requestsPromise]);
+    let smartCarInsuranceContractByContractAddress = {};
+    myContractsAddresses.map((contractAddress) => {
+      smartCarInsuranceContractByContractAddress[contractAddress] = SmartCarInsuranceContract(contractAddress);
+    });
+
+    this.setState({
+      web3,
+      smartCarInsuranceContractByContractAddress
+    });
+
+    // myContractsAddresses.map(async myContractAddress => {
+    //   let smartCarInsuranceContract = SmartCarInsuranceContract(myContractAddress);
+    //   let detailsPromise = smartCarInsuranceContract.methods.details().call();
+    //   let balancePromise = web3.eth.getBalance(myContractAddress);
+    //   let membersPromise = smartCarInsuranceContract.methods.getMembers().call();
+    //   let requestsPromise = smartCarInsuranceContract.methods.getLengthOfRequests().call()
+    //     .then((l) => {
+    //       let allRequestsPromise = []
+    //       for(let i = 0; i < l; i++){
+    //         allRequestsPromise.push(smartCarInsuranceContract.methods.requests(i).call());
+    //       }
+    //       return Promise.all(allRequestsPromise);
+    //     });
+    //   let [details, balance, members, requests] = await Promise.all([detailsPromise, balancePromise, membersPromise, requestsPromise]);
       // requests = await Promise.all(requests.map(async (request) => {
       //   let decodedData = (() => {
       //     try{
@@ -111,45 +108,60 @@ class MyContractsPage extends Component {
       //   }
       // }));
       // TODO: Obter os requests de forma correta
-      requests = [];
-      contracts.push({
-        balance,
-        details,
-        smartCarInsuranceContract,
-        members,
-        requests,
-        address: myContractAddress
-      });
-      this.setState({ contracts });
-    });
+    //   requests = [];
+    //   contracts.push({
+    //     balance,
+    //     details,
+    //     smartCarInsuranceContract,
+    //     members,
+    //     requests,
+    //     address: myContractAddress
+    //   });
+    //   this.setState({ contracts });
+    // });
   }
 
   render() {
     return (
       <DesktopContainer pathname={this.props.pathname}>
         <Segment style={{ padding: '4em 0em' }} vertical>
-          { this.state.contracts &&
-            this.state.contracts.map((contract) => {
+          { (this.state.myContractsAddresses && this.state.web3) &&
+            this.state.myContractsAddresses.map((contractAddress) => {
             return (
               <Card style={{ width: '800px', marginLeft: 'auto', marginRight: 'auto' }}>
                 <Card.Content>
-                  <ContractHeader/>
+                  <ContractHeader 
+                    smartCarInsuranceContract={this.state.smartCarInsuranceContractByContractAddress[contractAddress]} 
+                    web3={this.state.web3}
+                  />
                   <Tab style={{ marginTop: '12px' }} panes={[
                     {
                       menuItem: 'Detalhes', render: () =>
-                        <DetailsTabContent web3={web3} details={contract.details} address={contract.address} balance={contract.balance}></DetailsTabContent>
+                        <DetailsTabContent
+                          smartCarInsuranceContract={this.state.smartCarInsuranceContractByContractAddress[contractAddress]}
+                          web3={this.state.web3}
+                        />
                     },
                     {
                       menuItem: 'Participantes', render: () =>
-                        <MembersTabContent members={contract.members}/>
+                        <MembersTabContent
+                          smartCarInsuranceContract={this.state.smartCarInsuranceContractByContractAddress[contractAddress]} 
+                          web3={this.state.web3}
+                        />
                     },
                     {
                       menuItem: 'Requisições', render: () =>
-                        <RequestsTabContent/>
+                        <RequestsTabContent
+                          smartCarInsuranceContract={this.state.smartCarInsuranceContractByContractAddress[contractAddress]} 
+                          web3={this.state.web3}
+                        />
                     },
                     {
                       menuItem: 'Criar Requisição', render: () =>
-                        <NewRequestTabContent smartCarInsuranceContract={contract.smartCarInsuranceContract} web3={web3}></NewRequestTabContent>
+                        <NewRequestTabContent
+                          smartCarInsuranceContract={this.state.smartCarInsuranceContractByContractAddress[contractAddress]} 
+                          web3={this.state.web3}
+                        />
                     },
                   ]} />
                 </Card.Content>
@@ -161,5 +173,3 @@ class MyContractsPage extends Component {
     )
   }
 }
-
-export default MyContractsPage;

@@ -14,6 +14,7 @@ import BoolIcon from "../../components/BoolIcon";
 import LatLong from "../../components/LatLong";
 import moment from "moment";
 import NewRequestTabContent from "../../components/my_contracts/NewRequestTabContent";
+import DetailsTabContent from "../../components/my_contracts/DetailsTabContent";
 let smartCarInsuranceFactoryContract = null;
 let SmartCarInsuranceContract = null;
 let web3 = null;
@@ -57,54 +58,56 @@ class MyContractsPage extends Component {
           return Promise.all(allRequestsPromise);
         });
       let [details, balance, members, requests] = await Promise.all([detailsPromise, balancePromise, membersPromise, requestsPromise]);
-      requests = await Promise.all(requests.map(async (request) => {
-        let decodedData = (() => {
-          try{
-            return JSON.parse(request.encodedData);
-          }
-          catch(err){
-            return {};
-          }
-        })();
-        let keys = [];
-        let carLocationHistoryPromises = decodedData.keysOfGpsData.map((keyOfGpsData) => {
-          let idx = keyOfGpsData[0];
-          let key = keyOfGpsData[1];
-          keys.push(key);
-          return smartCarInsuranceContract.methods.gpsDataByUserAddress(account, idx).call();
-        })
+      // requests = await Promise.all(requests.map(async (request) => {
+      //   let decodedData = (() => {
+      //     try{
+      //       return JSON.parse(request.encodedData);
+      //     }
+      //     catch(err){
+      //       return {};
+      //     }
+      //   })();
+      //   let keys = [];
+      //   let carLocationHistoryPromises = decodedData.keysOfGpsData.map((keyOfGpsData) => {
+      //     let idx = keyOfGpsData[0];
+      //     let key = keyOfGpsData[1];
+      //     keys.push(key);
+      //     return smartCarInsuranceContract.methods.gpsDataByUserAddress(account, idx).call();
+      //   })
 
-        let carLocationHistoryGpsData = await Promise.all(carLocationHistoryPromises);
+      //   let carLocationHistoryGpsData = await Promise.all(carLocationHistoryPromises);
 
-        let carLocationHistory = carLocationHistoryGpsData.map((gpsData, idx) => {
-          console.log(gpsData.encryptedLatLong);
-          const decipher = crypto.createDecipher("aes256", keys[idx]);
-          let decrypedLatLong = {}
-          try{
-            decrypedLatLong = decipher.update(gpsData.encryptedLatLong, 'hex', 'utf8');
-            decrypedLatLong += decipher.final('utf8');
-          }
-          catch(err){
-            console.error(err);
-          }
-          console.log(decrypedLatLong);
-          return [moment.utc(gpsData.creationUnixTimestamp, 'X').format(), decrypedLatLong.lat, decrypedLatLong.long];
-        });
+      //   let carLocationHistory = carLocationHistoryGpsData.map((gpsData, idx) => {
+      //     console.log(gpsData.encryptedLatLong);
+      //     const decipher = crypto.createDecipher("aes256", keys[idx]);
+      //     let decrypedLatLong = {}
+      //     try{
+      //       decrypedLatLong = decipher.update(gpsData.encryptedLatLong, 'hex', 'utf8');
+      //       decrypedLatLong += decipher.final('utf8');
+      //     }
+      //     catch(err){
+      //       console.error(err);
+      //     }
+      //     console.log(decrypedLatLong);
+      //     return [moment.utc(gpsData.creationUnixTimestamp, 'X').format(), decrypedLatLong.lat, decrypedLatLong.long];
+      //   });
 
-        // TODO: Obter iAlreadyApproved and carLocationHistory
-        return {
-          createdBy: request.creatorAddress,
-          creationTime: moment.utc(Number(request.unixTimestampOfBlock), 'X').format(),
-          aproxTimeOfTheft: moment.utc(decodedData.unixTimesptampOfTheft, 'X').format(),
-          theftLocation: [decodedData.latTheft, decodedData.longTheft],
-          carLocationHistory: carLocationHistory,
-          approvers: request.nApprovers,
-          nTotalApprovers: details.nParticipants,
-          nMinApprovers: Math.ceil(details.nParticipants*details.minVotePercentageToRefund/100),
-          iAlreadyApproved: false,
-          boConfirmed: request.boConfirmed
-        }
-      }));
+      //   // TODO: Obter iAlreadyApproved and carLocationHistory
+      //   return {
+      //     createdBy: request.creatorAddress,
+      //     creationTime: moment.utc(Number(request.unixTimestampOfBlock), 'X').format(),
+      //     aproxTimeOfTheft: moment.utc(decodedData.unixTimesptampOfTheft, 'X').format(),
+      //     theftLocation: [decodedData.latTheft, decodedData.longTheft],
+      //     carLocationHistory: carLocationHistory,
+      //     approvers: request.nApprovers,
+      //     nTotalApprovers: details.nParticipants,
+      //     nMinApprovers: Math.ceil(details.nParticipants*details.minVotePercentageToRefund/100),
+      //     iAlreadyApproved: false,
+      //     boConfirmed: request.boConfirmed
+      //   }
+      // }));
+      // TODO: Obter os requests de forma correta
+      requests = [];
       contracts.push({
         balance,
         details,
@@ -140,16 +143,7 @@ class MyContractsPage extends Component {
                   <Tab style={{ marginTop: '12px' }} panes={[
                     {
                       menuItem: 'Detalhes', render: () =>
-                        <Tab.Pane>
-                          <b>Nome do contrato: </b>{contract.details.name}<br />
-                          <b>Endereço do contrato: </b>{contract.address}<br />
-                          <b>Criador do contrato: </b>{contract.details.creatorId}<br />
-                          <b>Contribuição inicial: </b>{web3.utils.fromWei(contract.details.initialContribution)} eth<br />
-                          <b>Reembolso: </b>{web3.utils.fromWei(contract.details.refundValue)} eth<br />
-                          <b>Caixa do contrato: </b>{web3.utils.fromWei(contract.balance)} eth<br />
-                          <b>Número de participantes: </b>{contract.details.nParticipants}/{contract.details.nMaxParticipants}<br />
-                          <b>Percentagem mínima de votos para liberar reembolso: </b>{contract.details.minVotePercentageToRefund} %<br />
-                        </Tab.Pane>
+                        <DetailsTabContent web3={web3} details={contract.details} address={contract.address} balance={contract.balance}></DetailsTabContent>
                     },
                     {
                       menuItem: 'Participantes', render: () =>

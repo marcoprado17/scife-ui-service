@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import {
   Button,
   Form,
-  Message
+  Message,
+  Tab
 } from 'semantic-ui-react';
 import moment from "moment";
 const bip39 = require("bip39");
@@ -18,7 +19,7 @@ class NewRequestTabContent extends Component {
 
   onSubmit = async () => {
     this.setState({
-      loading: true
+      loading: true, errorMessage: "", successMessage: ""
     });
 
     let account = (await this.props.web3.eth.getAccounts())[0];
@@ -75,56 +76,58 @@ class NewRequestTabContent extends Component {
   render() {
     console.log(this.state);
     return (
-      <Form onSubmit={this.onSubmit} style={{ padding: '18px 8px' }}>
-        <Form.Group widths='equal'>
+      <Tab.Pane>
+        <Form onSubmit={this.onSubmit} style={{ padding: '18px 8px' }}>
+          <Form.Group widths='equal'>
+            <Form.Field>
+              <label>Dia e hora aproximada do roubo (em UTC)</label>
+              <input
+                type='datetime-local'
+                value={this.state.timeOfTheft}
+                onChange={event => this.setState({ timeOfTheft: event.target.value })}
+              />
+            </Form.Field>
+            <Form.Field>
+              <label>Latidude (do local do roubo)</label>
+              <input type='number' min='-90' max='90' step='0.00000001'
+                value={this.state.lat}
+                onChange={event => this.setState({ lat: event.target.value })}
+              />
+            </Form.Field>
+            <Form.Field>
+              <label>Longitude (do local do roubo)</label>
+              <input type='number' min='-180' max='180' step='0.00000001'
+                value={this.state.long}
+                onChange={event => this.setState({ long: event.target.value })}
+              />
+            </Form.Field>
+          </Form.Group>
           <Form.Field>
-            <label>Dia e hora aproximada do roubo (em UTC)</label>
-            <input
-              type='datetime-local'
-              value={this.state.timeOfTheft}
-              onChange={event => this.setState({ timeOfTheft: event.target.value })}
+            <label>Mnemonico utilizado por seu gps para criptografar os dados</label>
+            <input type='text'
+              value={this.state.mnemonic}
+              onChange={event => this.setState({ mnemonic: event.target.value })}
             />
           </Form.Field>
-          <Form.Field>
-            <label>Latidude (do local do roubo)</label>
-            <input type='number' min='-90' max='90' step='0.00000001'
-              value={this.state.lat}
-              onChange={event => this.setState({ lat: event.target.value })}
-            />
-          </Form.Field>
-          <Form.Field>
-            <label>Longitude (do local do roubo)</label>
-            <input type='number' min='-180' max='180' step='0.00000001'
-              value={this.state.long}
-              onChange={event => this.setState({ long: event.target.value })}
-            />
-          </Form.Field>
-        </Form.Group>
-        <Form.Field>
-          <label>Mnemonico utilizado por seu gps para criptografar os dados</label>
-          <input type='text'
-            value={this.state.mnemonic}
-            onChange={event => this.setState({ mnemonic: event.target.value })}
-          />
-        </Form.Field>
-        <Message info header='Não se preocupe' content="Seu mnemonico só será utilizado para fornecer as chaves para descritografarmos os dados de seu gps nas 24 horas mais proximas do roubo." />
-        {
-          this.state.successMessage &&
-          <Message positive style={{ marginTop: "12px" }}>
-            <Message.Header>{this.state.successMessage}</Message.Header>
-          </Message>
-        }
-        {
-          this.state.errorMessage &&
-          <Message negative style={{ marginTop: "12px" }}>
-            <Message.Header>Falha ao tentar criar a nova requisição de reembolso!</Message.Header>
-            {this.state.errorMessage}
-          </Message>
-        }
-        <div style={{ textAlign: 'right' }}>
-          <Button loading={this.state.loading}>Criar requisição</Button>
-        </div>
-      </Form>
+          <Message info header='Não se preocupe' content="Seu mnemonico só será utilizado para fornecer as chaves para descritografarmos os dados de seu gps nas 24 horas mais proximas do roubo." />
+          {
+            this.state.successMessage &&
+            <Message positive style={{ marginTop: "12px" }}>
+              <Message.Header>{this.state.successMessage}</Message.Header>
+            </Message>
+          }
+          {
+            this.state.errorMessage &&
+            <Message negative style={{ marginTop: "12px" }}>
+              <Message.Header>Falha ao tentar criar a nova requisição de reembolso!</Message.Header>
+              {this.state.errorMessage}
+            </Message>
+          }
+          <div style={{ textAlign: 'right' }}>
+            <Button loading={this.state.loading}>Criar requisição</Button>
+          </div>
+        </Form>
+      </Tab.Pane>
     )
   }
 }

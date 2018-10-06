@@ -15,6 +15,7 @@ import LatLong from "../../components/LatLong";
 import moment from "moment";
 import NewRequestTabContent from "../../components/my_contracts/NewRequestTabContent";
 import DetailsTabContent from "../../components/my_contracts/DetailsTabContent";
+import MembersTabContent from "../../components/my_contracts/MembersTabContent";
 let smartCarInsuranceFactoryContract = null;
 let SmartCarInsuranceContract = null;
 let web3 = null;
@@ -147,19 +148,7 @@ class MyContractsPage extends Component {
                     },
                     {
                       menuItem: 'Participantes', render: () =>
-                        <Tab.Pane>
-                          <Table basic='very'>
-                            <Table.Body>
-                              {contract.members.map((memberAddress) => {
-                                return (
-                                  <Table.Row>
-                                    <Table.Cell>{memberAddress}</Table.Cell>
-                                  </Table.Row>
-                                )
-                              })}
-                            </Table.Body>
-                          </Table>
-                        </Tab.Pane>
+                        <MembersTabContent members={contract.members}/>
                     },
                     {
                       menuItem: 'Requisições', render: () =>

@@ -16,6 +16,7 @@ import moment from "moment";
 import NewRequestTabContent from "../../components/my_contracts/NewRequestTabContent";
 import DetailsTabContent from "../../components/my_contracts/DetailsTabContent";
 import MembersTabContent from "../../components/my_contracts/MembersTabContent";
+import RequestsTabContent from "../../components/my_contracts/RequestsTabContent";
 let smartCarInsuranceFactoryContract = null;
 let SmartCarInsuranceContract = null;
 let web3 = null;
@@ -152,49 +153,7 @@ class MyContractsPage extends Component {
                     },
                     {
                       menuItem: 'Requisições', render: () =>
-                        <Tab.Pane>
-                          {contract.requests.map((request, idx) => {
-                            return (
-                              <Segment vertical>
-                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                  <h3>Requisição {idx}</h3>
-                                  {request.iAlreadyApproved &&
-                                    <Label as='a' color='green' content='Requisição já aprovada' style={{ height: '28px' }} />
-                                  }
-                                </div>
-                                <b>Criado por: </b>{request.createdBy}<br />
-                                <b>Criado em: </b>{request.creationTime}<br />
-                                <b>Aprovações: </b>{request.approvers}/{request.nTotalApprovers}<br />
-                                <b>Número mínimo de aprovações: </b>{request.nMinApprovers}<br />
-                                <b>Hora aproximada do roubo ou furto: </b>{request.aproxTimeOfTheft}<br />
-                                <b>Local do furto: </b><LatLong lat={request.theftLocation[0]} long={request.theftLocation[1]} /><br />
-                                <b>Boletim de ocorrência gerado e confirmado pela polícia: </b><BoolIcon value={request.boConfirmed} /><br />
-                                <b>Histórico da localização do carro: </b><br />
-                                <Table>
-                                  <Table.Header>
-                                    <Table.Row>
-                                      <Table.HeaderCell>Tempo</Table.HeaderCell>
-                                      <Table.HeaderCell>Localização</Table.HeaderCell>
-                                    </Table.Row>
-                                  </Table.Header>
-                                  <Table.Body>
-                                    {request.carLocationHistory.map((carLoactionHistoryRow) => {
-                                      return (
-                                        <Table.Row>
-                                          <Table.Cell>{carLoactionHistoryRow[0]}</Table.Cell>
-                                          <Table.Cell><LatLong lat={carLoactionHistoryRow[1]} long={carLoactionHistoryRow[2]} /></Table.Cell>
-                                        </Table.Row>
-                                      )
-                                    })}
-                                  </Table.Body>
-                                </Table>
-                                <div style={{ textAlign: 'right' }}>
-                                  <Button type='submit' disabled={request.iAlreadyApproved}>Aprovar requisição</Button>
-                                </div>
-                              </Segment>
-                            )
-                          })}
-                        </Tab.Pane>
+                        <RequestsTabContent/>
                     },
                     {
                       menuItem: 'Criar Requisição', render: () =>

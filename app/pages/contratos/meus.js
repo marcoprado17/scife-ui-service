@@ -17,6 +17,7 @@ import NewRequestTabContent from "../../components/my_contracts/NewRequestTabCon
 import DetailsTabContent from "../../components/my_contracts/DetailsTabContent";
 import MembersTabContent from "../../components/my_contracts/MembersTabContent";
 import RequestsTabContent from "../../components/my_contracts/RequestsTabContent";
+import ContractHeader from "../../components/my_contracts/ContractHeader";
 let smartCarInsuranceFactoryContract = null;
 let SmartCarInsuranceContract = null;
 let web3 = null;
@@ -46,6 +47,7 @@ class MyContractsPage extends Component {
     let myContractsAddresses = await smartCarInsuranceFactoryContract.methods.getMyContractAddresses().call({
       from: account
     });
+
     myContractsAddresses.map(async myContractAddress => {
       let smartCarInsuranceContract = SmartCarInsuranceContract(myContractAddress);
       let detailsPromise = smartCarInsuranceContract.methods.details().call();
@@ -131,17 +133,7 @@ class MyContractsPage extends Component {
             return (
               <Card style={{ width: '800px', marginLeft: 'auto', marginRight: 'auto' }}>
                 <Card.Content>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <div>
-                      <h2 style={{ marginBottom: '2px' }}>{contract.name}</h2>
-                      <h5 style={{ marginTop: '2px' }}>{contract.id}</h5>
-                    </div>
-                    <div>
-                      {contract.requests.some((request) => { return !request.iAlreadyApproved }) &&
-                        <Label as='a' color='blue' content='Novas requisições' style={{ height: '28px', float: 'right', marginLeft: '4px' }} />
-                      }
-                    </div>
-                  </div>
+                  <ContractHeader/>
                   <Tab style={{ marginTop: '12px' }} panes={[
                     {
                       menuItem: 'Detalhes', render: () =>

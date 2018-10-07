@@ -6,6 +6,7 @@ import {
 class RequestsTabContent extends Component {
   constructor(props) {
     super(props);
+    this.state = {};
   }
 
   render() {

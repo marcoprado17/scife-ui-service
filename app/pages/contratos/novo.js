@@ -8,15 +8,15 @@ import {
   Card,
   Message
 } from 'semantic-ui-react'
-import DesktopContainer from "../../components/DesktopContainer"
-let smartCarInsuranceFactoryContract = null;
-let web3 = null; 
+import DesktopContainer from '../../components/DesktopContainer'
+let web3;
+let smartCarInsuranceContractFactory;
+const browserImports = () => {
+  web3 = require('../../../ethereum/web3').default;
+  smartCarInsuranceContractFactory = require('../../../ethereum/smartCarInsuranceContractFactory').default;
+}
 
-class CreateNewComponent extends Component {
-  static async getInitialProps({pathname}) {
-    return {pathname}
-  }
-  
+export default class NewContractPage extends Component {
   constructor(props){
     super(props);
     this.state = {
@@ -24,11 +24,18 @@ class CreateNewComponent extends Component {
       showSuccessMessage: false,
       errorMessage: ''
     }
+    this.browserDependenciesImported = false;
   }
 
+  static async getInitialProps({pathname}) {
+    return {pathname}
+  }
+  
   componentDidMount(){
-    smartCarInsuranceFactoryContract = require('../../../ethereum/smart_car_insurance_factory_contract').default;
-    web3 = require('../../../ethereum/web3').default;
+    if(!this.browserDependenciesImported) {
+      browserImports();
+      this.browserDependenciesImported = true;
+    }
   }
 
   onSubmit = async (event) => {
@@ -38,7 +45,7 @@ class CreateNewComponent extends Component {
 
     try {
       const accounts = await web3.eth.getAccounts();
-      await smartCarInsuranceFactoryContract.methods
+      await smartCarInsuranceContractFactory.methods
         .createSmartCarInsuranceContract(
           this.state.contractName,
           web3.utils.toWei(this.state.initialContribution),
@@ -70,7 +77,7 @@ class CreateNewComponent extends Component {
       <DesktopContainer pathname={this.props.pathname}>
         <Segment style={{ padding: '4em 0em', display: 'flex', justifyContent: 'center' }} vertical>
           <Card style={{width: '500px'}}>
-            <Card.Content header="Novo Contrato"/>
+            <Card.Content header='Novo Contrato'/>
             <Card.Content>
               <Form onSubmit={this.onSubmit}>
                 <Form.Field>
@@ -147,5 +154,3 @@ class CreateNewComponent extends Component {
     )
   }
 }
-
-export default CreateNewComponent;

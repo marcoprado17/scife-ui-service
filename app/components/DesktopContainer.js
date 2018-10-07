@@ -10,7 +10,6 @@ import {
   Header,
   Divider
 } from 'semantic-ui-react';
-import Head from 'next/head';
 import Link from "next/link";
 
 /* Heads up!

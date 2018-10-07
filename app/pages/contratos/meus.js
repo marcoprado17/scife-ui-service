@@ -5,21 +5,25 @@ import {
   Tab
 } from 'semantic-ui-react';
 import DesktopContainer from "../../components/DesktopContainer";
-import NewRequestTabContent from "../../components/my_contracts/NewRequestTabContent";
-import DetailsTabContent from "../../components/my_contracts/DetailsTabContent";
-import MembersTabContent from "../../components/my_contracts/MembersTabContent";
-import RequestsTabContent from "../../components/my_contracts/RequestsTabContent";
-import ContractHeader from "../../components/my_contracts/ContractHeader";
-if(process.browser) {
-  this.web3 = require('../../../ethereum/web3');
-  this.smartCarInsuranceContractFactory = require('../../../ethereum/smartCarInsuranceContractFactory');
-  this.SmartCarInsuranceContract = require('../../../ethereum/SmartCarInsuranceContract');
+import NewRequestTabContent from "../../components/pages/contratos/meus/NewRequestTabContent";
+import DetailsTabContent from "../../components/pages/contratos/meus/DetailsTabContent";
+import MembersTabContent from "../../components/pages/contratos/meus/MembersTabContent";
+import RequestsTabContent from "../../components/pages/contratos/meus/RequestsTabContent";
+import ContractHeader from "../../components/pages/contratos/meus/ContractHeader";
+let web3;
+let smartCarInsuranceContractFactory;
+let SmartCarInsuranceContract;
+const browserImports = () => {
+  web3 = require('../../../ethereum/web3').default;
+  smartCarInsuranceContractFactory = require('../../../ethereum/smartCarInsuranceContractFactory').default;
+  SmartCarInsuranceContract = require('../../../ethereum/SmartCarInsuranceContract').default;
 }
 
 export default class MyContractsPage extends Component {
   constructor(props) {
     super(props);
     this.state = {}
+    this.browserDependenciesImported = false;
   }
 
   static async getInitialProps({ pathname }) {
@@ -29,7 +33,11 @@ export default class MyContractsPage extends Component {
   }
 
   async componentDidMount() {
-    
+    if(!this.browserDependenciesImported) {
+      browserImports();
+      this.browserDependenciesImported = true;
+    }
+
     let account = (await web3.eth.getAccounts())[0];
     let myContractsAddresses = await smartCarInsuranceContractFactory.methods.getMyContractAddresses().call({
       from: account
@@ -122,51 +130,54 @@ export default class MyContractsPage extends Component {
   }
 
   render() {
+    console.log("render");
+    console.log(this.state);
     return (
       <DesktopContainer pathname={this.props.pathname}>
         <Segment style={{ padding: '4em 0em' }} vertical>
-          { (this.state.myContractsAddresses && this.state.web3) &&
-            this.state.myContractsAddresses.map((contractAddress) => {
-            return (
-              <Card style={{ width: '800px', marginLeft: 'auto', marginRight: 'auto' }}>
-                <Card.Content>
-                  <ContractHeader 
-                    smartCarInsuranceContract={this.state.smartCarInsuranceContractByContractAddress[contractAddress]} 
-                    web3={this.state.web3}
-                  />
-                  <Tab style={{ marginTop: '12px' }} panes={[
-                    {
-                      menuItem: 'Detalhes', render: () =>
-                        <DetailsTabContent
-                          smartCarInsuranceContract={this.state.smartCarInsuranceContractByContractAddress[contractAddress]}
-                          web3={this.state.web3}
-                        />
-                    },
-                    {
-                      menuItem: 'Participantes', render: () =>
-                        <MembersTabContent
-                          smartCarInsuranceContract={this.state.smartCarInsuranceContractByContractAddress[contractAddress]} 
-                          web3={this.state.web3}
-                        />
-                    },
-                    {
-                      menuItem: 'Requisições', render: () =>
-                        <RequestsTabContent
-                          smartCarInsuranceContract={this.state.smartCarInsuranceContractByContractAddress[contractAddress]} 
-                          web3={this.state.web3}
-                        />
-                    },
-                    {
-                      menuItem: 'Criar Requisição', render: () =>
-                        <NewRequestTabContent
-                          smartCarInsuranceContract={this.state.smartCarInsuranceContractByContractAddress[contractAddress]} 
-                          web3={this.state.web3}
-                        />
-                    },
-                  ]} />
-                </Card.Content>
-              </Card>
-            )
+          { (this.state.smartCarInsuranceContractByContractAddress && web3) &&
+            Object.keys(this.state.smartCarInsuranceContractByContractAddress).map((contractAddress) => {
+              let smartCarInsuranceContract = this.state.smartCarInsuranceContractByContractAddress[contractAddress];
+              return (
+                <Card key={contractAddress} style={{ width: '800px', marginLeft: 'auto', marginRight: 'auto' }}>
+                  <Card.Content>
+                    <ContractHeader
+                      smartCarInsuranceContract={smartCarInsuranceContract} 
+                      web3={web3}
+                    />
+                    <Tab style={{ marginTop: '12px' }} panes={[
+                      {
+                        menuItem: 'Detalhes', render: () =>
+                          <DetailsTabContent
+                            smartCarInsuranceContract={smartCarInsuranceContract} 
+                            web3={web3}
+                          />
+                      },
+                      {
+                        menuItem: 'Participantes', render: () =>
+                          <MembersTabContent
+                            smartCarInsuranceContract={smartCarInsuranceContract} 
+                            web3={web3}
+                          />
+                      },
+                      {
+                        menuItem: 'Requisições', render: () =>
+                          <RequestsTabContent
+                            smartCarInsuranceContract={smartCarInsuranceContract} 
+                            web3={web3}
+                          />
+                      },
+                      {
+                        menuItem: 'Criar Requisição', render: () =>
+                          <NewRequestTabContent
+                            smartCarInsuranceContract={smartCarInsuranceContract} 
+                            web3={web3}
+                          />
+                      },
+                    ]} />
+                  </Card.Content>
+                </Card>
+              )
           })}
         </Segment>
       </DesktopContainer>

@@ -6,10 +6,7 @@ import {
   Divider
 } from 'semantic-ui-react'
 import DesktopContainer from "../components/DesktopContainer"
-import LatLong from "../components/LatLong  "
-let smartCarInsuranceFactoryContract = null;
-let SmartCarInsuranceContract = null;
-let web3 = null;
+import LatLong from "../components/LatLong"
 
 class CreateNewComponent extends Component {
   static async getInitialProps({pathname}) {

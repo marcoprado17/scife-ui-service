@@ -58,4 +58,5 @@ sudo docker-compose -f /usr/local/ui-service/devops/docker-compose.yaml up -d;
 
 * Importal os orquivos dos ethereum via npm;
 * Atualizar o rep com o arquivo ethereum original;
-* Utilizar algum módulo de DI (Dependency Injection) para organizar melhor o código.
+* Utilizar algum módulo de DI (Dependency Injection) para organizar melhor o código;
+* Usar o next-routes para deixar o nome das páginas em inglês mas as rotas na url em portugues, bem como para definir os componentes da página dentra da pasta da página.

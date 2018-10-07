@@ -9,8 +9,8 @@ import {
   Image,
   Segment
 } from 'semantic-ui-react'
-import DesktopContainer from "../components/DesktopContainer"
-import Link from "next/link"
+import DesktopContainer from '../components/DesktopContainer'
+import Link from 'next/link'
 
 
 /* eslint-disable react/no-multi-comp */
@@ -46,7 +46,7 @@ const HomepageHeading = ({ mobile }) => (
           marginTop: mobile ? '0.5em' : '1.5em',
         }}
       />
-      <Link href="/contratos/existentes">
+      <Link href='/contratos/existentes'>
         <Button primary size='huge'>
           Participar de um contrato existente
           <Icon name='right arrow' />
@@ -125,13 +125,13 @@ class Index extends Component {
                 </Header>
                 <p style={{ fontSize: '1.33em' }}>
                   As chaves privadas de sua conta Ethereum estão localmente armazenadas no MetaMask. Além disso, nenhuma transação será executada
-                  sem seu concentimento. Para instalar ou saber mais sobre o MetaMask acesse <a href="https://metamask.io/">https://metamask.io/</a>.
+                  sem seu concentimento. Para instalar ou saber mais sobre o MetaMask acesse <a href='https://metamask.io/'>https://metamask.io/</a>.
                 </p>
               </Grid.Column>
             </Grid.Row>
             <Grid.Row>
               <Grid.Column textAlign='center'>
-                <Link href="/contratos/novo">
+                <Link href='/contratos/novo'>
                   <Button size='huge'>Criar um novo contrato</Button>
                 </Link>
               </Grid.Column>
@@ -143,19 +143,19 @@ class Index extends Component {
             <Grid.Row textAlign='center'>
               <Grid.Column style={{ paddingBottom: '5em', paddingTop: '5em' }}>
                 <Header as='h3' style={{ fontSize: '2em' }}>
-                  "Finalmente eu posso dormir sem medo de ser furtado ou roubado"
+                  'Finalmente eu posso dormir sem medo de ser furtado ou roubado'
                 </Header>
                 <p style={{ fontSize: '1.33em' }}>
-                    <Image avatar size="tiny" src='/img/marco_aurelio.jpg' />
+                    <Image avatar size='tiny' src='/img/marco_aurelio.jpg' />
                     Marco Aurélio Prado
                 </p>
               </Grid.Column>
               <Grid.Column style={{ paddingBottom: '5em', paddingTop: '5em' }}>
                 <Header as='h3' style={{ fontSize: '2em' }}>
-                  "Encontrei um seguro automotivo transparente e com um preço justo"
+                  'Encontrei um seguro automotivo transparente e com um preço justo'
                 </Header>
                 <p style={{ fontSize: '1.33em' }}>
-                  <Image avatar size="tiny" src='/img/ludmila.jpg' />
+                  <Image avatar size='tiny' src='/img/ludmila.jpg' />
                   Ludmila Vidoca
                 </p>
               </Grid.Column>
@@ -171,7 +171,7 @@ class Index extends Component {
               Qualquer pessoa pode criar um contrato de seguro automotivo e convidar outras pessoas a se juntarem ao seguro.
               Basta clicar no link abaixo e preencher as informações do contrato.
             </p>
-            <Link href="/contratos/novo">
+            <Link href='/contratos/novo'>
               <Button as='a' size='large'>
                 Criar um novo contrato
               </Button>
@@ -185,7 +185,7 @@ class Index extends Component {
               aprovada para participar daquele contrato, ela deve estar em dia com as obrigações do contrato para pedir reembolso com sucesso.
               As obrigações se referem ao pagamento da taxa mensal e ao envio da localização do carro pelo dispositivo GPS instalado no carro.
             </p>
-            <Link href="/contratos/existentes">
+            <Link href='/contratos/existentes'>
               <Button as='a' size='large'>
                 Participar de um contrato existente
               </Button>
@@ -198,7 +198,7 @@ class Index extends Component {
               Ao criar ou aderir a um contrato você pode efetuar algumas ações: como aprovar a entrada de novo segurado no contrato ou 
               criar uma requisição de pedido de reembolso.
             </p>
-            <Link href="/contratos/meus">
+            <Link href='/contratos/meus'>
               <Button as='a' size='large'>
                 Administrar meus contratos
               </Button>

@@ -43,6 +43,8 @@ export default class MyContractsPage extends Component {
       from: account
     });
 
+    console.log("myContractsAddresses", myContractsAddresses);
+
     let smartCarInsuranceContractByContractAddress = {};
     myContractsAddresses.map((contractAddress) => {
       smartCarInsuranceContractByContractAddress[contractAddress] = SmartCarInsuranceContract(contractAddress);

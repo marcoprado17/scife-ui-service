@@ -38,7 +38,7 @@ class DetailsTabContent extends Component {
             <b>Reembolso: </b>{this.props.web3.utils.fromWei(this.state.details.refundValue)} eth<br />
             <b>Caixa do contrato: </b>{this.props.web3.utils.fromWei(this.state.balance)} eth<br />
             <b>Número de participantes: </b>{this.state.details.nParticipants}/{this.state.details.nMaxParticipants}<br />
-            <b>Percentagem mínima de votos para liberar reembolso: </b>{this.state.details.minVotePercentageToRefund} %<br />
+            <b>Percentagem mínima de votos para liberar reembolso: </b>{this.state.details.minVotePercentageToRefund}%<br />
           </div>
         }
       </Tab.Pane>

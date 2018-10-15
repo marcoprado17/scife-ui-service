@@ -3,7 +3,8 @@ import {
   Tab,
   Segment,
   Table,
-  Button
+  Button,
+  Message
 } from 'semantic-ui-react';
 import LatLong from "../../../LatLong";
 import BoolIcon from "../../../BoolIcon";
@@ -112,30 +113,40 @@ class RequestsTabContent extends Component {
               <b>Hora aproximada do roubo ou furto: </b>{request.aproxTimeOfTheft}<br />
               <b>Local do furto: </b><LatLong lat={request.latTheft} long={request.longTheft} /><br />
               <b>Boletim de ocorrência gerado e confirmado pela polícia: </b><BoolIcon value={request.boConfirmed} /><br />
-              <b>Histórico da localização do carro: </b><br />
-              <Table>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.HeaderCell>Tempo (marcado pelo GPS)</Table.HeaderCell>
-                    <Table.HeaderCell>Tempo (do bloco)</Table.HeaderCell>
-                    <Table.HeaderCell>Localização</Table.HeaderCell>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {request.carLocationHistory.map((carLocation) => {
-                    return (
+              {
+                request.carLocationHistory.length > 0 ?
+                <div>
+                  <b>Histórico da localização do carro: </b><br />
+                  <Table>
+                    <Table.Header>
                       <Table.Row>
-                        <Table.Cell>{carLocation.creationTime}</Table.Cell>
-                        <Table.Cell>{carLocation.blockMineredTime}</Table.Cell>
-                        <Table.Cell><LatLong lat={carLocation.lat} long={carLocation.long} /></Table.Cell>
+                        <Table.HeaderCell>Tempo (marcado pelo GPS)</Table.HeaderCell>
+                        <Table.HeaderCell>Tempo (do bloco)</Table.HeaderCell>
+                        <Table.HeaderCell>Localização</Table.HeaderCell>
                       </Table.Row>
-                    )
-                  })}
-                </Table.Body>
-              </Table>
-              <div style={{ textAlign: 'right' }}>
-                <Button type='submit' disabled={request.iAlreadyApproved}>Aprovar requisição</Button>
-              </div>
+                    </Table.Header>
+                    <Table.Body>
+                      {request.carLocationHistory.map((carLocation) => {
+                        return (
+                          <Table.Row>
+                            <Table.Cell>{carLocation.creationTime}</Table.Cell>
+                            <Table.Cell>{carLocation.blockMineredTime}</Table.Cell>
+                            <Table.Cell><LatLong lat={carLocation.lat} long={carLocation.long} /></Table.Cell>
+                          </Table.Row>
+                        )
+                      })}
+                    </Table.Body>
+                  </Table>
+                  <div style={{ textAlign: 'right' }}>
+                    <Button type='submit' disabled={request.iAlreadyApproved}>Aprovar requisição</Button>
+                  </div>
+                </div>
+                :
+                <Message negative style={{ marginTop: "12px" }}>
+                  <Message.Header>Não foi possível decifrar a localização do gps nas horas proximas do roubo.</Message.Header>
+                  Peça para {request.creatorAddress} gerar uma nova requisição com as chaves corretas do gps
+                </Message>
+              }
             </Segment>
           )
         })}

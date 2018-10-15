@@ -38,22 +38,22 @@ class NewRequestTabContent extends Component {
       let lengthOfGpsData = await this.props.smartCarInsuranceContract.methods.getLengthOfGpsData(account).call();
       let max = Math.min(gpsDataIndex + 6, lengthOfGpsData - 1);
 
-      console.log("gpsDataIndex", gpsDataIndex);
-      console.log("min", min);
-      console.log("max", max);
-
       let keysOfGpsData = [];
 
       const gpsHdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(this.state.mnemonic));
-      console.log("gpsHdwallet", gpsHdwallet);
-      console.log("this.state.mnemonic: ", this.state.mnemonic);
+
+      let pAllGpsData = [];
+      
+      for (let i = min; i <= max; i++) {
+        pAllGpsData.push(this.props.smartCarInsuranceContract.methods.gpsDataByUserAddress(account, i).call());
+      }
+
+      let allGpsData = await Promise.all(pAllGpsData);
 
       for (let i = min; i <= max; i++) {
-        let gpsData = await this.props.smartCarInsuranceContract.methods.gpsDataByUserAddress(account, i).call();
+        let gpsData = allGpsData[i-min];
         let walledChildrenIdx = gpsData.creationUnixTimestamp - 946684800;
-        console.log("walledChildrenIdx: ", walledChildrenIdx);
         let key = gpsHdwallet.deriveChild(walledChildrenIdx).getWallet().getPrivateKey().toString('hex');
-        console.log(key);
         keysOfGpsData.push([i, key])
       }
 
@@ -64,9 +64,6 @@ class NewRequestTabContent extends Component {
         keysOfGpsData: keysOfGpsData
       }
 
-      console.log(gpsData);
-
-      console.log("Iniciando chamada");
       try {
         await this.props.smartCarInsuranceContract.methods.createNewRefundRequest(JSON.stringify(gpsData)).send({
           from: account

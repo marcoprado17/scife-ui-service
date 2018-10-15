@@ -9,7 +9,128 @@ import {
 import LatLong from "../../../LatLong";
 import BoolIcon from "../../../BoolIcon";
 import moment from "moment";
-const crypto = require('crypto');
+import crypto from 'crypto';
+let web3;
+const browserImports = () => {
+  web3 = require('../../../../../ethereum/web3').default;
+}
+
+class Request extends Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      approving: false,
+      iAlreadyApproved: this.props.iAlreadyApproved,
+      nApprovers: this.props.nApprovers
+    };
+    this.browserDependenciesImported = false;
+  }
+
+  approve = async () => {
+    console.log(this.props);
+    let idx = this.props.idx;
+    console.log(idx);
+    this.setState({
+      approving: true,
+      successApproveMessage: "",
+      errorApproveMessage: "",
+    });
+
+    const accounts = await web3.eth.getAccounts();
+
+    this.props.smartCarInsuranceContract.methods.approveRequest(idx).send({
+        from: accounts[0]
+    })
+      .then(() => {
+        this.setState((oldState) => ({
+          approving: false,
+          iAlreadyApproved: true,
+          successApproveMessage: "Requisição aprovada com sucesso",
+          nApprovers: oldState.nApprovers + 1
+        }));
+      })
+      .catch((err) => {
+        this.setState({
+          approving: false,
+          errorApproveMessage: err.message
+        });
+      });
+  }
+
+  componentDidMount(){
+    if(!this.browserDependenciesImported) {
+      browserImports();
+      this.browserDependenciesImported = true;
+    }
+  }
+
+  render() {
+    return (
+      <Segment vertical>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <h3>Requisição {this.props.key}</h3>
+          {this.state.iAlreadyApproved &&
+            <Label as='a' color='green' content='Requisição já aprovada' style={{ height: '28px' }} />
+          }
+        </div>
+        <b>Criado por: </b>{this.props.creatorAddress}<br />
+        <b>Criado em: </b>{this.props.creationTime}<br />
+        <b>Aprovações: </b>{this.state.nApprovers}/{this.props.nParticipants}<br />
+        <b>Número mínimo de aprovações: </b>{this.props.nMinApprovers}<br />
+        <b>Hora aproximada do roubo ou furto: </b>{this.props.aproxTimeOfTheft}<br />
+        <b>Local do furto: </b><LatLong lat={this.props.latTheft} long={this.props.longTheft} /><br />
+        <b>Boletim de ocorrência gerado e confirmado pela polícia: </b><BoolIcon value={this.props.boConfirmed} /><br />
+        {
+          this.props.carLocationHistory.length > 0 ?
+          <div>
+            <b>Histórico da localização do carro: </b><br />
+            <Table>
+              <Table.Header>
+                <Table.Row>
+                  <Table.HeaderCell>Tempo (marcado pelo GPS)</Table.HeaderCell>
+                  <Table.HeaderCell>Tempo (do bloco)</Table.HeaderCell>
+                  <Table.HeaderCell>Localização</Table.HeaderCell>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {this.props.carLocationHistory.map((carLocation) => {
+                  return (
+                    <Table.Row>
+                      <Table.Cell>{carLocation.creationTime}</Table.Cell>
+                      <Table.Cell>{carLocation.blockMineredTime}</Table.Cell>
+                      <Table.Cell><LatLong lat={carLocation.lat} long={carLocation.long} /></Table.Cell>
+                    </Table.Row>
+                  )
+                })}
+              </Table.Body>
+            </Table>
+            {
+              this.state.errorApproveMessage &&
+              <Message negative style={{ marginTop: "12px" }}>
+                <Message.Header>Falha ao tentar aprovar a requisição!</Message.Header>
+                {this.state.errorApproveMessage}
+              </Message>
+            }
+            {
+              this.state.successApproveMessage &&
+              <Message positive style={{ marginTop: "12px" }}>
+                <Message.Header>{this.state.successApproveMessage}</Message.Header>
+              </Message>
+            }
+            <div style={{ textAlign: 'right' }}>
+              <Button type='submit' loading={this.state.approving} disabled={this.state.iAlreadyApproved || this.state.approving} idx={this.props.key} onClick={this.approve}>Aprovar requisição</Button>
+            </div>
+          </div>
+          :
+          <Message negative style={{ marginTop: "12px" }}>
+            <Message.Header>Não foi possível decifrar a localização do gps nas horas proximas do roubo.</Message.Header>
+            Peça para {this.props.creatorAddress} gerar uma nova requisição com as chaves corretas do gps
+          </Message>
+        }
+      </Segment>
+    )
+  }
+}
 
 class RequestsTabContent extends Component {
   constructor(props) {
@@ -98,57 +219,7 @@ class RequestsTabContent extends Component {
         }
         { this.state.requests && 
           this.state.requests.map((request, idx) => {
-          return (
-            <Segment vertical>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <h3>Requisição {idx}</h3>
-                {request.iAlreadyApproved &&
-                  <Label as='a' color='green' content='Requisição já aprovada' style={{ height: '28px' }} />
-                }
-              </div>
-              <b>Criado por: </b>{request.creatorAddress}<br />
-              <b>Criado em: </b>{request.creationTime}<br />
-              <b>Aprovações: </b>{request.nApprovers}/{request.nParticipants}<br />
-              <b>Número mínimo de aprovações: </b>{request.nMinApprovers}<br />
-              <b>Hora aproximada do roubo ou furto: </b>{request.aproxTimeOfTheft}<br />
-              <b>Local do furto: </b><LatLong lat={request.latTheft} long={request.longTheft} /><br />
-              <b>Boletim de ocorrência gerado e confirmado pela polícia: </b><BoolIcon value={request.boConfirmed} /><br />
-              {
-                request.carLocationHistory.length > 0 ?
-                <div>
-                  <b>Histórico da localização do carro: </b><br />
-                  <Table>
-                    <Table.Header>
-                      <Table.Row>
-                        <Table.HeaderCell>Tempo (marcado pelo GPS)</Table.HeaderCell>
-                        <Table.HeaderCell>Tempo (do bloco)</Table.HeaderCell>
-                        <Table.HeaderCell>Localização</Table.HeaderCell>
-                      </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                      {request.carLocationHistory.map((carLocation) => {
-                        return (
-                          <Table.Row>
-                            <Table.Cell>{carLocation.creationTime}</Table.Cell>
-                            <Table.Cell>{carLocation.blockMineredTime}</Table.Cell>
-                            <Table.Cell><LatLong lat={carLocation.lat} long={carLocation.long} /></Table.Cell>
-                          </Table.Row>
-                        )
-                      })}
-                    </Table.Body>
-                  </Table>
-                  <div style={{ textAlign: 'right' }}>
-                    <Button type='submit' disabled={request.iAlreadyApproved}>Aprovar requisição</Button>
-                  </div>
-                </div>
-                :
-                <Message negative style={{ marginTop: "12px" }}>
-                  <Message.Header>Não foi possível decifrar a localização do gps nas horas proximas do roubo.</Message.Header>
-                  Peça para {request.creatorAddress} gerar uma nova requisição com as chaves corretas do gps
-                </Message>
-              }
-            </Segment>
-          )
+            return <Request {...request} key={idx} idx={idx} smartCarInsuranceContract={this.props.smartCarInsuranceContract}/>
         })}
       </Tab.Pane>
     )

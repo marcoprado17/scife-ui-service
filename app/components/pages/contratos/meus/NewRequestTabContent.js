@@ -30,7 +30,7 @@ class NewRequestTabContent extends Component {
     let unixTimesptampOfTheft = Number(moment.utc(this.state.timeOfTheft).format("X"));
     console.log(unixTimesptampOfTheft);
     // TODO: Remover esse unixTimesptampOfTheft temporário
-    unixTimesptampOfTheft = 1539558638;
+    unixTimesptampOfTheft = 1539630733;
 
     try {
       let gpsDataIndex = Number(await this.props.smartCarInsuranceContract.methods.getGpsDataIndex(account, unixTimesptampOfTheft).call());

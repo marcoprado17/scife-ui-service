@@ -92,7 +92,7 @@ class DesktopContainer extends Component {
                             Disclaimer
                         </Header>
                         <p>
-                            Esta aplicação não deve ser utilizada para fins comerciais. Ela foi feita como parte de trabalho de conclusão de curso de Engenharia de Computação.
+                            Esta aplicação não deve ser utilizada para fins comerciais. Ela foi feita como parte do trabalho final de graduação do curso de Engenharia de Computação.
                         </p>
                         </Grid.Column>
                     </Grid.Row>

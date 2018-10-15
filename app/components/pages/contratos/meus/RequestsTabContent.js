@@ -4,7 +4,8 @@ import {
   Segment,
   Table,
   Button,
-  Message
+  Message,
+  Label
 } from 'semantic-ui-react';
 import LatLong from "../../../LatLong";
 import BoolIcon from "../../../BoolIcon";
@@ -46,7 +47,7 @@ class Request extends Component {
           approving: false,
           iAlreadyApproved: true,
           successApproveMessage: "Requisição aprovada com sucesso",
-          nApprovers: oldState.nApprovers + 1
+          nApprovers: Number(oldState.nApprovers) + 1
         }));
       })
       .catch((err) => {
@@ -57,20 +58,13 @@ class Request extends Component {
       });
   }
 
-  componentDidMount(){
-    if(!this.browserDependenciesImported) {
-      browserImports();
-      this.browserDependenciesImported = true;
-    }
-  }
-
   render() {
     return (
       <Segment vertical>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <h3>Requisição {this.props.key}</h3>
+          <h3>Requisição {this.props.idx}</h3>
           {this.state.iAlreadyApproved &&
-            <Label as='a' color='green' content='Requisição já aprovada' style={{ height: '28px' }} />
+            <Label as='a' color='green' content='Requisição já aprovada por mim' style={{ height: '28px' }} />
           }
         </div>
         <b>Criado por: </b>{this.props.creatorAddress}<br />
@@ -139,6 +133,13 @@ class RequestsTabContent extends Component {
   }
 
   async componentDidMount() {
+    if(!this.browserDependenciesImported) {
+      browserImports();
+      this.browserDependenciesImported = true;
+    }
+
+    const accounts = await web3.eth.getAccounts();
+
     let pContractDetails = this.props.smartCarInsuranceContract.methods.details().call();
     let pNMinApprovers = this.props.smartCarInsuranceContract.methods.getMinApprovers().call();
 
@@ -153,7 +154,7 @@ class RequestsTabContent extends Component {
         return Promise.all(pRequests);
       })
       .then((requests) => {
-        let pCompleteRequests = requests.map(async (request) => {
+        let pCompleteRequests = requests.map(async (request, requestIdx) => {
           let requestData = JSON.parse(request.encodedData);
           let keysOfGpsData = requestData.keysOfGpsData;
           let pAllGpsData = keysOfGpsData.map((keyOfGpsData) => {
@@ -185,6 +186,10 @@ class RequestsTabContent extends Component {
           request.carLocationHistory = carLocationHistory;
           request.creationTime = moment(request.unixTimestampOfBlock, 'X').format()
 
+          let iAlreadyApproved = await this.props.smartCarInsuranceContract.methods.iAlreadyApproved(requestIdx).call({
+            from: accounts[0]
+          });
+
           return {
             carLocationHistory,
             boConfirmed: request.boConfirmed,
@@ -196,7 +201,7 @@ class RequestsTabContent extends Component {
             aproxTimeOfTheft: moment(requestData.unixTimesptampOfTheft, 'X').format(),
             latTheft: requestData.latTheft,
             longTheft: requestData.longTheft,
-            iAlreadyApproved: false
+            iAlreadyApproved: iAlreadyApproved
           }
         })
         return Promise.all(pCompleteRequests);

@@ -61,7 +61,8 @@ class NewRequestTabContent extends Component {
         unixTimesptampOfTheft: unixTimesptampOfTheft,
         latTheft: this.state.lat,
         longTheft: this.state.long,
-        keysOfGpsData: keysOfGpsData
+        keysOfGpsData: keysOfGpsData,
+        plate: this.state.plate
       }
 
       try {
@@ -109,13 +110,22 @@ class NewRequestTabContent extends Component {
               />
             </Form.Field>
           </Form.Group>
-          <Form.Field>
-            <label>Mnemonico utilizado por seu gps para criptografar os dados</label>
-            <input type='text'
-              value={this.state.mnemonic}
-              onChange={event => this.setState({ mnemonic: event.target.value })}
-            />
-          </Form.Field>
+          <Form.Group>
+            <Form.Field width="12">
+              <label>Mnemonico utilizado por seu gps para criptografar os dados</label>
+              <input type='text'
+                value={this.state.mnemonic}
+                onChange={event => this.setState({ mnemonic: event.target.value })}
+              />
+            </Form.Field>
+            <Form.Field width="4">
+              <label>Placa do veículo</label>
+              <input type='text'
+                value={this.state.plate}
+                onChange={event => this.setState({ plate: event.target.value })}
+              />
+            </Form.Field>
+          </Form.Group>
           <Message info header='Não se preocupe' content="Seu mnemonico só será utilizado para fornecer as chaves para descritografarmos os dados de seu gps nas 24 horas mais proximas do roubo." />
           {
             this.state.successMessage &&

@@ -71,6 +71,7 @@ class Request extends Component {
         <b>Criado em: </b>{this.props.creationTime}<br />
         <b>Aprovações: </b>{this.state.nApprovers}/{this.props.nParticipants}<br />
         <b>Número mínimo de aprovações: </b>{this.props.nMinApprovers}<br />
+        <b>Placa do veículo: </b>{this.props.plate}<br />
         <b>Hora aproximada do roubo ou furto: </b>{this.props.aproxTimeOfTheft}<br />
         <b>Local do furto: </b><LatLong lat={this.props.latTheft} long={this.props.longTheft} /><br />
         <b>Boletim de ocorrência gerado e confirmado pela polícia: </b><BoolIcon value={this.props.boConfirmed} /><br />
@@ -118,7 +119,7 @@ class Request extends Component {
           :
           <Message negative style={{ marginTop: "12px" }}>
             <Message.Header>Não foi possível decifrar a localização do gps nas horas proximas do roubo.</Message.Header>
-            Peça para {this.props.creatorAddress} gerar uma nova requisição com as chaves corretas do gps
+            Peça para {this.props.creatorAddress} checar se os dados do gps foram enviados e gerar uma nova requisição com as chaves corretas do gps
           </Message>
         }
       </Segment>
@@ -201,7 +202,8 @@ class RequestsTabContent extends Component {
             aproxTimeOfTheft: moment(requestData.unixTimesptampOfTheft, 'X').format(),
             latTheft: requestData.latTheft,
             longTheft: requestData.longTheft,
-            iAlreadyApproved: iAlreadyApproved
+            iAlreadyApproved: iAlreadyApproved,
+            plate: requestData.plate
           }
         })
         return Promise.all(pCompleteRequests);

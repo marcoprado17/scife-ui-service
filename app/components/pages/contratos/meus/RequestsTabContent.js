@@ -22,7 +22,10 @@ class Request extends Component {
     this.state = {
       approving: false,
       iAlreadyApproved: this.props.iAlreadyApproved,
-      nApprovers: this.props.nApprovers
+      nApprovers: this.props.nApprovers,
+      requiringRefund: false,
+      refundMade: this.props.refundMade,
+      contractBalance: this.props.contractBalance
     };
     this.browserDependenciesImported = false;
   }
@@ -58,7 +61,41 @@ class Request extends Component {
       });
   }
 
+  requireRefund = async () => {
+    this.setState({
+      requiringRefund: true,
+      successRefundessage: "",
+      errorRefundMessage: "",
+    });
+
+    let idx = this.props.idx;
+    const accounts = await web3.eth.getAccounts();
+
+    this.props.smartCarInsuranceContract.methods.getRefund(idx).send({
+        from: accounts[0]
+    })
+      .then(async () => {
+        const contractAddress = this.props.smartCarInsuranceContract.options.address;
+        let contractBalance = await this.props.web3.eth.getBalance(contractAddress);
+
+        this.setState((oldState) => ({
+          requiringRefund: false,
+          refundMade: true,
+          successRefundMessage: "Reembolso realizado com sucesso",
+          contractBalance: contractBalance
+        }));
+      })
+      .catch((err) => {
+        this.setState({
+          requiringRefund: false,
+          errorRefundMessage: err.message
+        });
+      });
+  }
+
   render() {
+    console.log("this.props.refundValue", this.props.refundValue);
+
     return (
       <Segment vertical>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -69,7 +106,8 @@ class Request extends Component {
         </div>
         <b>Criado por: </b>{this.props.creatorAddress}<br />
         <b>Criado em: </b>{this.props.creationTime}<br />
-        <b>Caixa do contrato: </b>{web3.utils.fromWei(this.props.contractBalance)} eth<br />
+        <b>Caixa do contrato: </b>{web3.utils.fromWei(this.state.contractBalance)} eth<br />
+        <b>Reembolso: </b>{web3.utils.fromWei(this.props.refundValue)} eth<br />
         <b>Reembolso realizado: </b><BoolIcon value={this.props.refundMade} /><br />
         <b>Aprovações: </b>{this.state.nApprovers}/{this.props.nParticipants}<br />
         <b>Número mínimo de aprovações: </b>{this.props.nMinApprovers}<br />
@@ -114,8 +152,22 @@ class Request extends Component {
                 <Message.Header>{this.state.successApproveMessage}</Message.Header>
               </Message>
             }
+            {
+              this.state.errorRefundMessage &&
+              <Message negative style={{ marginTop: "12px" }}>
+                <Message.Header>Falha ao tentar obter o reembolso!</Message.Header>
+                {this.state.errorApproveMessage}
+              </Message>
+            }
+            {
+              this.state.successRefundMessage &&
+              <Message positive style={{ marginTop: "12px" }}>
+                <Message.Header>{this.state.successRefundMessage}</Message.Header>
+              </Message>
+            }
             <div style={{ textAlign: 'right' }}>
-              <Button type='submit' loading={this.state.approving} disabled={this.state.iAlreadyApproved || this.state.approving} idx={this.props.key} onClick={this.approve}>Aprovar requisição</Button>
+              <Button type='submit' loading={this.state.requiringRefund} disabled={this.state.refundMade || this.state.requiringRefund || !this.props.iCreated} onClick={this.requireRefund}>Obter reembolso</Button>
+              <Button type='submit' loading={this.state.approving} disabled={this.state.iAlreadyApproved || this.state.approving} onClick={this.approve}>Aprovar requisição</Button>
             </div>
           </div>
           :
@@ -195,6 +247,8 @@ class RequestsTabContent extends Component {
             from: accounts[0]
           });
 
+          let iCreated = request.creatorAddress == accounts[0];
+
           return {
             carLocationHistory,
             boConfirmed: request.boConfirmed,
@@ -209,7 +263,9 @@ class RequestsTabContent extends Component {
             iAlreadyApproved: iAlreadyApproved,
             plate: requestData.plate,
             contractBalance: contractBalance,
-            refundMade: request.refundMade
+            refundMade: request.refundMade,
+            iCreated: iCreated,
+            refundValue: contractDetails.refundValue
           }
         })
         return Promise.all(pCompleteRequests);

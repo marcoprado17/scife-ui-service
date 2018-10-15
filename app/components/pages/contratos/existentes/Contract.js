@@ -69,7 +69,7 @@ export default class Contract extends Component {
             <b>Reembolso: </b>{web3.utils.fromWei(this.state.details.refundValue.toString())} eth<br />
             <b>Caixa do contrato: </b>{web3.utils.fromWei(this.state.balance.toString())} eth<br />
             <b>Número de participantes: </b>{this.state.details.nParticipants}/{this.state.details.nMaxParticipants}<br />
-            <b>Percentagem mínima de votos para liberar reembolso: </b>{this.state.details.minVotePercentageToRefund} %<br />
+            <b>Percentagem mínima de votos para liberar reembolso: </b>{this.state.details.minVotePercentageToRefund}%<br />
             {
               this.state.successMessage &&
               <Message positive style={{marginTop: '12px'}}>

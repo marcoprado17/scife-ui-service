@@ -30,7 +30,7 @@ class NewRequestTabContent extends Component {
     let unixTimesptampOfTheft = Number(moment.utc(this.state.timeOfTheft).format("X"));
     console.log(unixTimesptampOfTheft);
     // TODO: Remover esse unixTimesptampOfTheft temporário
-    unixTimesptampOfTheft = 1539547158;
+    unixTimesptampOfTheft = 1539558638;
 
     try {
       let gpsDataIndex = Number(await this.props.smartCarInsuranceContract.methods.getGpsDataIndex(account, unixTimesptampOfTheft).call());
@@ -45,11 +45,15 @@ class NewRequestTabContent extends Component {
       let keysOfGpsData = [];
 
       const gpsHdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(this.state.mnemonic));
+      console.log("gpsHdwallet", gpsHdwallet);
+      console.log("this.state.mnemonic: ", this.state.mnemonic);
 
       for (let i = min; i <= max; i++) {
         let gpsData = await this.props.smartCarInsuranceContract.methods.gpsDataByUserAddress(account, i).call();
         let walledChildrenIdx = gpsData.creationUnixTimestamp - 946684800;
-        let key = gpsHdwallet.deriveChild(walledChildrenIdx).getWallet().getPrivateKey();
+        console.log("walledChildrenIdx: ", walledChildrenIdx);
+        let key = gpsHdwallet.deriveChild(walledChildrenIdx).getWallet().getPrivateKey().toString('hex');
+        console.log(key);
         keysOfGpsData.push([i, key])
       }
 

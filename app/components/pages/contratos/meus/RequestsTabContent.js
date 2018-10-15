@@ -69,6 +69,8 @@ class Request extends Component {
         </div>
         <b>Criado por: </b>{this.props.creatorAddress}<br />
         <b>Criado em: </b>{this.props.creationTime}<br />
+        <b>Caixa do contrato: </b>{web3.utils.fromWei(this.props.contractBalance)} eth<br />
+        <b>Reembolso realizado: </b><BoolIcon value={this.props.refundMade} /><br />
         <b>Aprovações: </b>{this.state.nApprovers}/{this.props.nParticipants}<br />
         <b>Número mínimo de aprovações: </b>{this.props.nMinApprovers}<br />
         <b>Placa do veículo: </b>{this.props.plate}<br />
@@ -140,11 +142,13 @@ class RequestsTabContent extends Component {
     }
 
     const accounts = await web3.eth.getAccounts();
+    const contractAddress = this.props.smartCarInsuranceContract.options.address;
 
     let pContractDetails = this.props.smartCarInsuranceContract.methods.details().call();
     let pNMinApprovers = this.props.smartCarInsuranceContract.methods.getMinApprovers().call();
+    let pContractBalance = this.props.web3.eth.getBalance(contractAddress);
 
-    let [contractDetails, nMinApprovers] = await Promise.all([pContractDetails, pNMinApprovers]);
+    let [contractDetails, nMinApprovers, contractBalance] = await Promise.all([pContractDetails, pNMinApprovers, pContractBalance]);
 
     let requests = await this.props.smartCarInsuranceContract.methods.getLengthOfRequests().call()
       .then((l) => {
@@ -203,7 +207,9 @@ class RequestsTabContent extends Component {
             latTheft: requestData.latTheft,
             longTheft: requestData.longTheft,
             iAlreadyApproved: iAlreadyApproved,
-            plate: requestData.plate
+            plate: requestData.plate,
+            contractBalance: contractBalance,
+            refundMade: request.refundMade
           }
         })
         return Promise.all(pCompleteRequests);

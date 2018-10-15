@@ -17,98 +17,84 @@ class RequestsTabContent extends Component {
   }
 
   async componentDidMount() {
-    console.log("componentDidMount called");
-    console.log(this.state);
+    let pContractDetails = this.props.smartCarInsuranceContract.methods.details().call();
+    let pNMinApprovers = this.props.smartCarInsuranceContract.methods.getMinApprovers().call();
 
-    console.log("this.props.smartCarInsuranceContract.methods", this.props.smartCarInsuranceContract.methods);
+    let [contractDetails, nMinApprovers] = await Promise.all([pContractDetails, pNMinApprovers]);
 
-    let lengthOfRequests = await this.props.smartCarInsuranceContract.methods.getLengthOfRequests().call();
-
-    console.log("lengthOfRequests", lengthOfRequests);
-
-    let requestsPromises = [];
-    // TODO: Setar initialRequestIdx para 0
-    let initialRequestIdx = lengthOfRequests-1;
-    for(let i = initialRequestIdx; i < lengthOfRequests; i++){
-      requestsPromises.push(this.props.smartCarInsuranceContract.methods.requests(i).call());
-    }
-
-    let requests = [];
-
-    let requestsResults = await Promise.all(requestsPromises);
-    let contractDetails = await this.props.smartCarInsuranceContract.methods.details().call();
-    let nMinApprovers = await this.props.smartCarInsuranceContract.methods.getMinApprovers().call();
-
-    console.log("contractDetails", contractDetails);
-
-    for(let j = 0; j < requestsResults.length; j++){
-      let requestResult = requestsResults[j];
-      console.log(requestResult);
-      let requestData = JSON.parse(requestResult.encodedData);
-
-      console.log("requestData", requestData);
-
-      let carLocationHistory = []
-
-      for(let i = 0; i < requestData.keysOfGpsData.length; i++){
-        let keyData = requestData.keysOfGpsData[i];
-        console.log("keyData", keyData);
-        let gpsData = await this.props.smartCarInsuranceContract.methods.gpsDataByUserAddress(requestResult.creatorAddress, keyData[0]).call();
-        console.log("gpsData", gpsData);
-
-        console.log("idx: ", keyData[0])
-        const key = new Buffer(keyData[1], 'hex');
-        console.log(key);
-        const decipher = crypto.createDecipher("aes256", key);
-        let decrypted = decipher.update(gpsData.encryptedLatLong, 'hex', 'utf8');
-        decrypted += decipher.final('utf8');
-        console.log(decrypted);
-
-        let decryptedLatLong = JSON.parse(decrypted);
-
-        carLocationHistory.push({
-          creationTime: moment(gpsData.creationUnixTimestamp, 'X').format(),
-          blockMineredTime: moment(gpsData.blockUnixTimestamp, 'X').format(),
-          lat: decryptedLatLong.lat,
-          long: decryptedLatLong.long
-        });
-      }
-
-      console.log("carLocationHistory", carLocationHistory);
-
-      // TODO: Obter o iAlreadyApproved
-
-      console.log(moment(requestResult.unixTimestampOfBlock, 'X').format())
-
-      requests.push({
-        carLocationHistory,
-        boConfirmed: requestResult.boConfirmed,
-        creatorAddress: requestResult.creatorAddress,
-        nApprovers: requestResult.nApprovers,
-        creationTime: moment(requestResult.unixTimestampOfBlock, 'X').format(),
-        nParticipants: contractDetails.nParticipants,
-        nMinApprovers: nMinApprovers,
-        aproxTimeOfTheft: moment(requestData.unixTimesptampOfTheft, 'X').format(),
-        latTheft: requestData.latTheft,
-        longTheft: requestData.longTheft,
-        iAlreadyApproved: false
+    let requests = await this.props.smartCarInsuranceContract.methods.getLengthOfRequests().call()
+      .then((l) => {
+        let pRequests = [];
+        for(let i = 0; i < l; i++){
+          pRequests.push(this.props.smartCarInsuranceContract.methods.requests(i).call());
+        }
+        return Promise.all(pRequests);
       })
-    }
+      .then((requests) => {
+        let pCompleteRequests = requests.map(async (request) => {
+          let requestData = JSON.parse(request.encodedData);
+          let keysOfGpsData = requestData.keysOfGpsData;
+          let pAllGpsData = keysOfGpsData.map((keyOfGpsData) => {
+            return this.props.smartCarInsuranceContract.methods.gpsDataByUserAddress(request.creatorAddress, keyOfGpsData[0]).call();
+          })
+          let allGpsData = await Promise.all(pAllGpsData);
 
-    console.log("requests", requests);
+          let carLocationHistory = [];
+
+          allGpsData.map((gpsData, idx) => {
+            try {
+              let key = new Buffer(keysOfGpsData[idx][1], 'hex');
+              let decipher = crypto.createDecipher("aes256", key);
+              let decrypted = decipher.update(gpsData.encryptedLatLong, 'hex', 'utf8');
+              decrypted += decipher.final('utf8');
+              let decryptedLatLong = JSON.parse(decrypted);
+              carLocationHistory.push({
+                creationTime: moment(gpsData.creationUnixTimestamp, 'X').format(),
+                blockMineredTime: moment(gpsData.blockUnixTimestamp, 'X').format(),
+                lat: decryptedLatLong.lat,
+                long: decryptedLatLong.long
+              })
+            }
+            catch(err){
+              console.log(err);
+            }
+          });
+
+          request.carLocationHistory = carLocationHistory;
+          request.creationTime = moment(request.unixTimestampOfBlock, 'X').format()
+
+          return {
+            carLocationHistory,
+            boConfirmed: request.boConfirmed,
+            creatorAddress: request.creatorAddress,
+            nApprovers: request.nApprovers,
+            creationTime: moment(request.unixTimestampOfBlock, 'X').format(),
+            nParticipants: contractDetails.nParticipants,
+            nMinApprovers: nMinApprovers,
+            aproxTimeOfTheft: moment(requestData.unixTimesptampOfTheft, 'X').format(),
+            latTheft: requestData.latTheft,
+            longTheft: requestData.longTheft,
+            iAlreadyApproved: false
+          }
+        })
+        return Promise.all(pCompleteRequests);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
 
     this.setState({
       requests
     });
-
-    // this.setState({
-    //   members: await this.props.smartCarInsuranceContract.methods.getMembers().call()
-    // });
   }
 
   render() {
     return (
       <Tab.Pane>
+        {
+          !this.state.requests &&
+          <p>Carregando...</p>
+        }
         { this.state.requests && 
           this.state.requests.map((request, idx) => {
           return (

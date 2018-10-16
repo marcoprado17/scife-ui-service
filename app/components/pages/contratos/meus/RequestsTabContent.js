@@ -78,12 +78,12 @@ class Request extends Component {
         const contractAddress = this.props.smartCarInsuranceContract.options.address;
         let contractBalance = await this.props.web3.eth.getBalance(contractAddress);
 
-        this.setState((oldState) => ({
+        this.setState({
           requiringRefund: false,
           refundMade: true,
           successRefundMessage: "Reembolso realizado com sucesso",
           contractBalance: contractBalance
-        }));
+        });
       })
       .catch((err) => {
         this.setState({

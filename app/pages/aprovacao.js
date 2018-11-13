@@ -154,74 +154,79 @@ class CreateNewComponent extends Component {
     let requests = []
 
     for(let i = 0; i < contractsAddresses.length; i++){
-      let contractAddress = contractsAddresses[i];
+      try {
+        let contractAddress = contractsAddresses[i];
 
-      let smartCarInsuranceContract = SmartCarInsuranceContract(contractAddress);
+        let smartCarInsuranceContract = SmartCarInsuranceContract(contractAddress);
 
-      let contractDetails = await smartCarInsuranceContract.methods.details().call();
+        let contractDetails = await smartCarInsuranceContract.methods.details().call();
 
-      let requestsOfContract = await smartCarInsuranceContract.methods.getLengthOfRequests().call()
-        .then((l) => {
-          let pRequests = [];
-          for(let i = 0; i < l; i++){
-            pRequests.push(smartCarInsuranceContract.methods.requests(i).call());
-          }
-          return Promise.all(pRequests);
-        })
-        .then((requests) => {
-          let pCompleteRequests = requests.map(async (request, requestIdx) => {
-            let requestData = JSON.parse(request.encodedData);
-            let keysOfGpsData = requestData.keysOfGpsData;
-            let pAllGpsData = keysOfGpsData.map((keyOfGpsData) => {
-              return smartCarInsuranceContract.methods.gpsDataByUserAddress(request.creatorAddress, keyOfGpsData[0]).call();
-            })
-            let allGpsData = await Promise.all(pAllGpsData);
-
-            let carLocationHistory = [];
-
-            allGpsData.map((gpsData, idx) => {
-              try {
-                let key = new Buffer(keysOfGpsData[idx][1], 'hex');
-                let decipher = crypto.createDecipher("aes256", key);
-                let decrypted = decipher.update(gpsData.encryptedLatLong, 'hex', 'utf8');
-                decrypted += decipher.final('utf8');
-                let decryptedLatLong = JSON.parse(decrypted);
-                carLocationHistory.push({
-                  creationTime: moment(gpsData.creationUnixTimestamp, 'X').format(),
-                  blockMineredTime: moment(gpsData.blockUnixTimestamp, 'X').format(),
-                  lat: decryptedLatLong.lat,
-                  long: decryptedLatLong.long
-                })
-              }
-              catch(err){
-                console.log(err);
-              }
-            });
-
-            request.carLocationHistory = carLocationHistory;
-            request.creationTime = moment(request.unixTimestampOfBlock, 'X').format()
-
-            return {
-              carLocationHistory,
-              boConfirmed: request.boConfirmed,
-              creatorAddress: request.creatorAddress,
-              creationTime: moment(request.unixTimestampOfBlock, 'X').format(),
-              aproxTimeOfTheft: moment(requestData.unixTimesptampOfTheft, 'X').format(),
-              latTheft: requestData.latTheft,
-              longTheft: requestData.longTheft,
-              plate: requestData.plate,
-              contractName: contractDetails.name,
-              contractAddress: contractAddress,
-              requestIdx: requestIdx
+        let requestsOfContract = await smartCarInsuranceContract.methods.getLengthOfRequests().call()
+          .then((l) => {
+            let pRequests = [];
+            for(let i = 0; i < l; i++){
+              pRequests.push(smartCarInsuranceContract.methods.requests(i).call());
             }
+            return Promise.all(pRequests);
           })
-          return Promise.all(pCompleteRequests);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+          .then((requests) => {
+            let pCompleteRequests = requests.map(async (request, requestIdx) => {
+              let requestData = JSON.parse(request.encodedData);
+              let keysOfGpsData = requestData.keysOfGpsData;
+              let pAllGpsData = keysOfGpsData.map((keyOfGpsData) => {
+                return smartCarInsuranceContract.methods.gpsDataByUserAddress(request.creatorAddress, keyOfGpsData[0]).call();
+              })
+              let allGpsData = await Promise.all(pAllGpsData);
 
-      requests.push(...requestsOfContract);
+              let carLocationHistory = [];
+
+              allGpsData.map((gpsData, idx) => {
+                try {
+                  let key = new Buffer(keysOfGpsData[idx][1], 'hex');
+                  let decipher = crypto.createDecipher("aes256", key);
+                  let decrypted = decipher.update(gpsData.encryptedLatLong, 'hex', 'utf8');
+                  decrypted += decipher.final('utf8');
+                  let decryptedLatLong = JSON.parse(decrypted);
+                  carLocationHistory.push({
+                    creationTime: moment(gpsData.creationUnixTimestamp, 'X').format(),
+                    blockMineredTime: moment(gpsData.blockUnixTimestamp, 'X').format(),
+                    lat: decryptedLatLong.lat,
+                    long: decryptedLatLong.long
+                  })
+                }
+                catch(err){
+                  console.log(err);
+                }
+              });
+
+              request.carLocationHistory = carLocationHistory;
+              request.creationTime = moment(request.unixTimestampOfBlock, 'X').format()
+
+              return {
+                carLocationHistory,
+                boConfirmed: request.boConfirmed,
+                creatorAddress: request.creatorAddress,
+                creationTime: moment(request.unixTimestampOfBlock, 'X').format(),
+                aproxTimeOfTheft: moment(requestData.unixTimesptampOfTheft, 'X').format(),
+                latTheft: requestData.latTheft,
+                longTheft: requestData.longTheft,
+                plate: requestData.plate,
+                contractName: contractDetails.name,
+                contractAddress: contractAddress,
+                requestIdx: requestIdx
+              }
+            })
+            return Promise.all(pCompleteRequests);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+
+        requests.push(...requestsOfContract);
+      }
+      catch(err) {
+
+      }
     }
     
     console.log(requests);
